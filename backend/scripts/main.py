@@ -10,6 +10,14 @@ import numpy as np
 import pandas as pd
 import cv2
 import signal
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+import base64
+from PIL import Image
+import uvicorn
+import io
+
+app = FastAPI()
 
 # initialize models and env files
 mp_pose = mp.solutions.pose
@@ -19,6 +27,16 @@ pose = mp_pose.Pose(model_complexity=0, min_detection_confidence=0.5, min_tracki
 face_mesh = mp_face_mesh.FaceMesh()
 tts_engine = pyttsx3.init()
 load_dotenv()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Change to frontend URL in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 
 
 # defining current directory
@@ -35,102 +53,86 @@ confidence_data = []
 FRAME_WIDTH = 640  
 FRAME_HEIGHT = 600
 
-def detect_face_confidence():
-    cap = cv2.VideoCapture(0)
-    if not cap.isOpened():
-        print("Error: Camera not accessible!")
-        return
+async def decode_image(img_string):
+    """ Decodes base64 image received from React """
+    try:
+        img_data = base64.b64decode(img_string.split(',')[1])
+        image = Image.open(io.BytesIO(img_data))
+        return cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    except Exception as e:
+        print(f"Error decoding image: {e}")
+        return None  # Return None if decoding fails
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            print("Error: Failed to read frame!")
-            break
+@app.websocket("/ws")
+async def detect_face_confidence(websocket: WebSocket):
+    """ WebSocket connection for face confidence detection """
+    await websocket.accept()
+    print("Connected to WebSocket")
 
-      
-        frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT))
+    try:
+        while True:
+            data = await websocket.receive_json()
 
-        # convert frame to RGB
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            if "image" not in data:
+                print("Invalid data format received. Skipping...")
+                continue
 
-        # process face detection
-        face_results = face_mesh.process(rgb_frame)
+            frame = await decode_image(data["image"])
 
-        # default confidence (0% if no face detected)
-        face_confidence = 100.0  
+            if frame is None:
+                print("Warning: Empty frame received, skipping processing.")
+                continue  # Skip this frame
 
-        if face_results.multi_face_landmarks:
-            face_landmarks = face_results.multi_face_landmarks[0].landmark
+            # Convert to RGB for MediaPipe
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            face_results = face_mesh.process(rgb_frame)
 
-            # Get key face points
-            nose_tip = face_landmarks[1]  # Nose tip (reference for centering)
-            left_eye = face_landmarks[33]  # Left eye center
-            right_eye = face_landmarks[263]  # Right eye center
+            # Default confidence (0% if no face detected)
+            face_confidence = 100.0  
 
-            # Convert to pixel values
-            nose_x = int(nose_tip.x * FRAME_WIDTH)
-            nose_y = int(nose_tip.y * FRAME_HEIGHT)
-            left_eye_x = int(left_eye.x * FRAME_WIDTH)
-            right_eye_x = int(right_eye.x * FRAME_WIDTH)
+            if face_results.multi_face_landmarks:
+                face_landmarks = face_results.multi_face_landmarks[0].landmark
 
-            # checking horizontal centering
-            center_x = FRAME_WIDTH // 2
-            deviation_x = abs(nose_x - center_x)
-            max_deviation = FRAME_WIDTH // 3  # Allowable head movement before penalty
+                # Get key face points
+                nose_tip = face_landmarks[1]
+                left_eye = face_landmarks[33]
+                right_eye = face_landmarks[263]
 
-            if deviation_x > max_deviation:
-                penalty_x = min((deviation_x / FRAME_WIDTH) * 100, 40)  # Gradual drop
-                face_confidence -= penalty_x
+                # Convert to pixel values
+                nose_x = int(nose_tip.x * FRAME_WIDTH)
+                left_eye_x = int(left_eye.x * FRAME_WIDTH)
+                right_eye_x = int(right_eye.x * FRAME_WIDTH)
 
-            # checking head tilt (Rotation)
-            eye_distance = abs(left_eye_x - right_eye_x)
-            expected_eye_distance = FRAME_WIDTH // 5  # Approximate normal eye distance
+                # Checking horizontal centering
+                center_x = FRAME_WIDTH // 2
+                deviation_x = abs(nose_x - center_x)
+                max_deviation = FRAME_WIDTH // 3  
 
-            tilt_penalty = min(abs(expected_eye_distance - eye_distance) / expected_eye_distance * 40, 30)
-            face_confidence -= tilt_penalty  # Reduce confidence gradually based on tilt
+                if deviation_x > max_deviation:
+                    penalty_x = min((deviation_x / FRAME_WIDTH) * 100, 40)  
+                    face_confidence -= penalty_x
 
-            # check distance from Camera (Z-Axis)
-            nose_depth = nose_tip.z  # Z is negative when closer
-            if nose_depth < -0.3:  # Too close
-                face_confidence -= 15
-            elif nose_depth > 0.2:  # Too far
-                face_confidence -= 25
+                # Checking head tilt (Rotation)
+                eye_distance = abs(left_eye_x - right_eye_x)
+                expected_eye_distance = FRAME_WIDTH // 5  
 
-            # Ensure confidence stays in [0, 100] range
-            face_confidence = max(min(face_confidence, 100), 0)
+                tilt_penalty = min(abs(expected_eye_distance - eye_distance) / expected_eye_distance * 40, 30)
+                face_confidence -= tilt_penalty  
 
-            # Draw landmarks on the frame
-            for face_landmarks in face_results.multi_face_landmarks:
-                mp_drawing.draw_landmarks(frame, face_landmarks, mp_face_mesh.FACEMESH_TESSELATION)
+                # Ensure confidence stays in [0, 100] range
+                face_confidence = max(min(face_confidence, 100), 0)
 
-            # Draw nose center
-            cv2.circle(frame, (nose_x, nose_y), 5, (0, 255, 0), -1)
+            else:
+                face_confidence = 0  # No face detected
 
-        else:
-            face_confidence = 0  # No face detected
+            # Send confidence score back to React
+            await websocket.send_json({"face_confidence": face_confidence})
 
-        # Display confidence score
-        confidence_text = f"Face Confidence: {face_confidence:.2f}%"
-        cv2.putText(frame, confidence_text, (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    except WebSocketDisconnect:
+        print("WebSocket connection closed.")
+    except Exception as e:
+        print(f"Unexpected WebSocket Error: {e}")
 
-        # Show the live video
-        cv2.imshow("Face Confidence Detection", frame)
-
-        # Store confidence data
-        confidence_data.append(face_confidence)
-
-        # Press 'q' to exit
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
-    print("Camera feed stopped.")
-
-    # Save confidence scores to CSV
-    df = pd.DataFrame({"Face Confidence (%)": confidence_data})
-    df.to_csv("face_confidence.csv", index=False)
-    print("Face confidence data saved to face_confidence.csv!")
 
 
 
@@ -192,4 +194,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+   
+    uvicorn.run(app, host="0.0.0.0", port=8000)
