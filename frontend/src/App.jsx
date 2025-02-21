@@ -12,7 +12,7 @@ import Header from "./components/Header";
 import Hero from "./components/Hero";
 import ResumeUploader from "./pages/ResumeUploader";
 import Interview from "./pages/Interview";
-// import Results from "./pages/Results";
+import Results from "./pages/Results";
 import ForgotPassword from "./pages/ForgotPassword";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
@@ -56,7 +56,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/resumeuploader" element={<ResumeUploader />} />
             <Route path="/interview" element={<Interview />} />
-            {/* <Route path="/results" element={<Results />} /> */}
+            <Route path="/results" element={<Results />} />
             {/* <Route path="/dashboard" element={<Dashboard />} /> */}
           </Route>
         </Routes>
