@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Section from "../components/Section";
 import { Rings } from "../components/design/Hero";
 
 const Interview = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // Hook to get current location (route)
   const videoRef = useRef(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [timer, setTimer] = useState(0);
@@ -32,7 +31,7 @@ const Interview = () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
-        audio: false,
+        audio: false, // Disable audio
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -113,18 +112,36 @@ const Interview = () => {
         <h2 className="text-4xl font-extrabold text-white mb-6">Interview</h2>
 
         <div className="flex flex-col items-center">
-          {/* Video stream */}
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full rounded-lg shadow-lg"
+          {/* Combined video or placeholder screen */}
+          <div
+            className={`w-full h-full flex flex-col items-center justify-center ${
+              !isCameraOn ? "bg-gray-900" : ""
+            } text-white text-xl rounded-lg shadow-lg mb-4`}
             style={{
-              height: "400px",
-              objectFit: "cover",
+              height: "850px",
+              width: "1800px",
               marginBottom: "20px",
+              objectFit: "cover",
             }}
-          />
+          >
+            {!isCameraOn ? (
+              <>
+                <p className="mb-2">Waiting for camera...</p>
+                <p>{user}</p>
+              </>
+            ) : (
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                className="w-full rounded-lg shadow-lg"
+                style={{
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            )}
+          </div>
 
           <div className="flex flex-col items-center w-full max-w-lg">
             {/* Timer and Interview Controls */}
