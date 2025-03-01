@@ -7,7 +7,7 @@ import { Rings } from "../components/design/Hero";
 const Signup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -55,7 +55,7 @@ const Signup = () => {
             type="text"
             name="username"
             placeholder="Full Name"
-            value={formData.name}
+            value={formData.username}
             onChange={handleChange}
             required
             className="w-full p-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900"
