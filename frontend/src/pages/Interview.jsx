@@ -80,6 +80,13 @@ const Interview = () => {
     setTimer(600); // 10-minute timer
   };
 
+  const handleGenerateResult = () => {
+    stopCamera();
+    setTimer(0);
+    setIsInterviewStarted(false);
+    navigate("/results");
+  };
+
   // End Interview & Stop Camera
   const handleEndInterview = () => {
     stopCamera();
@@ -178,7 +185,7 @@ const Interview = () => {
               {isInterviewStarted && questionIndex === questions.length - 1 && (
                 <button
                   className="px-6 py-3 bg-purple-500 text-white font-bold rounded-lg shadow-md hover:bg-purple-600 transition"
-                  onClick={() => navigate("/results")}
+                  onClick={handleGenerateResult}
                 >
                   Generate Evaluation
                 </button>

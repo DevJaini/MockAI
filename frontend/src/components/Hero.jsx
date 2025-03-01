@@ -104,13 +104,13 @@ const Hero = () => {
             <div className="flex justify-center gap-4">
               <Button
                 onClick={() => navigate("/login")}
-                className="text-black px-4 py-2 rounded-lg transition"
+                className="text-color-1 px-4 py-2 rounded-lg transition"
               >
                 Log In
               </Button>
               <Button
                 onClick={() => navigate("/signup")}
-                className="text-black px-4 py-2 rounded-lg transition"
+                className="text-color-1 px-4 py-2 rounded-lg transition"
               >
                 Sign Up
               </Button>
