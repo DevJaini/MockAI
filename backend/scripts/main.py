@@ -9,7 +9,7 @@ import mediapipe as mp
 import numpy as np
 import pandas as pd
 import cv2
-import signal
+# import signal
 
 # initialize models and env files
 mp_pose = mp.solutions.pose
@@ -22,8 +22,8 @@ load_dotenv()
 
 
 # defining current directory
-thisdir = pathlib.Path(__file__).parent.absolute()
-client = openai.Client(api_key=os.getenv("OPENAPI_KEY"))
+# thisdir = pathlib.Path(__file__).parent.absolute()
+# client = openai.Client(api_key=os.getenv("OPENAPI_KEY"))
 
 landmark_data = []
 
@@ -134,7 +134,7 @@ def detect_face_confidence():
 
 
 
-def generate_interview_questions(resume_text, job_description):
+# def generate_interview_questions(resume_text, job_description):
     prompt = f"""
     You are an AI job interview coach. Generate 5 technical and behavioral interview questions 
     based on the following resume and job description: 
