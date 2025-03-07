@@ -9,15 +9,36 @@ import mediapipe as mp
 import numpy as np
 import pandas as pd
 import cv2
-import signal
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import base64
 from PIL import Image
 import uvicorn
 import io
+import soundfile as sf
+from faster_whisper import WhisperModel
+from pydub import AudioSegment
+import librosa
+import wave
+from scipy.io.wavfile import write
+from gtts import gTTS
+import time
+import re
 
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 app = FastAPI()
+UPLOAD_DIR = "uploads"
+STATIC_DIR = "static"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(STATIC_DIR, exist_ok=True)
+
+# Mount static files directory to serve MP3 files
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+session_state = {"questions": [], "current_question_index": 0}
 
 # initialize models and env files
 mp_pose = mp.solutions.pose
@@ -37,6 +58,7 @@ app.add_middleware(
 )
 
 
+whisper_model = WhisperModel("tiny", compute_type="int8", num_workers=1)
 
 
 # defining current directory
@@ -53,6 +75,7 @@ confidence_data = []
 FRAME_WIDTH = 640  
 FRAME_HEIGHT = 600
 
+#function to decode image
 async def decode_image(img_string):
     """ Decodes base64 image received from React """
     try:
@@ -63,7 +86,8 @@ async def decode_image(img_string):
         print(f"Error decoding image: {e}")
         return None  # Return None if decoding fails
 
-@app.websocket("/ws")
+# function to detect face confidence based on eye movement and face centering
+@app.websocket("/face-confidence")
 async def detect_face_confidence(websocket: WebSocket):
     """ WebSocket connection for face confidence detection """
     await websocket.accept()
@@ -133,9 +157,80 @@ async def detect_face_confidence(websocket: WebSocket):
     except Exception as e:
         print(f"Unexpected WebSocket Error: {e}")
 
+# function to convert audio from frontend to desired sample rate and format
+async def convert_audio(file: UploadFile):
+    # convert webm to wav and return numpy array
+    try:
+        audio_data = await file.read()
+        audio_io = io.BytesIO(audio_data)
 
+        # convert WebM to WAV
+        audio_segment = AudioSegment.from_file(audio_io, format="webm")
+        original_sample_rate = audio_segment.frame_rate
+        audio_segment = audio_segment.set_frame_rate(16000).set_channels(1)
 
+        print(f"Original Sample Rate: {original_sample_rate} Hz converted to 16,000 Hz")
 
+        # save for debugging
+        wav_filename = "uploaded_audio.wav"
+        audio_segment.export(wav_filename, format="wav")
+
+        # convert to NumPy array
+        audio_np = np.array(audio_segment.get_array_of_samples(), dtype=np.float32) / 32768.0
+
+        # ensure at least 1 second (16000 samples)
+        if len(audio_np) < 16000:
+            print(f"⚠️ Audio too short ({len(audio_np)} samples), padding to 16000 samples...")
+            audio_np = np.pad(audio_np, (0, 16000 - len(audio_np)), mode='constant')
+
+        return wav_filename
+    except Exception as e:
+        print(f"Error converting audio: {e}")
+        return None
+
+# function to upload audio and transcribe it
+@app.post("/upload-audio")
+async def upload_audio(file: UploadFile = File(...)):
+    # receive audio file, convert and transcribe
+    converted_wav = await convert_audio(file)
+
+    if not converted_wav:
+        return {"error": "Audio conversion failed"}
+
+    # transcribe using Whisper
+    segments, _ = whisper_model.transcribe(converted_wav, language="en")
+    transcription = " ".join([segment.text for segment in segments])
+
+    print(f"Transcription: {transcription}")
+
+    return {"transcription": transcription}
+
+# function to sanitize string by removing unwanted characters
+def sanitize_string(text):
+    """
+    Cleans the input text by removing unwanted characters like asterisks, extra spaces, and empty entries.
+
+    Parameters:
+    - text (str): The input string.
+
+    Returns:
+    - str: A cleaned version of the input string.
+    """
+    if not isinstance(text, str) or not text.strip():
+        return None  # Ignore empty or non-string values
+
+    # Remove asterisks, special characters, and extra spaces
+    text = re.sub(r"[\*\"'_]", "", text)  # Removes *, ", ', _
+    
+    # Remove numeric prefixes (e.g., "1. ", "2. ")
+    text = re.sub(r"^\d+\.\s*", "", text)
+
+    # Normalize multiple spaces into a single space and strip leading/trailing spaces
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
+
+# function to generate interview questions based on resume and job description
 def generate_interview_questions(resume_text, job_description):
     prompt = f"""
     You are an AI job interview coach. Generate 5 technical and behavioral interview questions 
@@ -161,22 +256,118 @@ def generate_interview_questions(resume_text, job_description):
     print(response.choices[0].message.content.split("\n"))
     return response.choices[0].message.content.split("\n")
 
-# parses the pad file to get the text and generates questions
+# function to convert text to speech
+def text_to_speech(text, output_file):
+    """Converts text to speech and saves it as an MP3 file."""
+    file_path = os.path.join(STATIC_DIR, output_file)
+
+    if os.path.exists(file_path):
+        print(f"🔊 Reusing existing speech file: {file_path}")
+        return file_path
+
+    try:
+        tts = gTTS(text=text, lang="en", slow=False)
+        tts.save(file_path)
+        print(f"🔊 Saved speech: {file_path}")
+        return file_path
+    except Exception as e:
+        print(f"Error generating speech: {e}")
+        return None
+
+# function to read questions and converting them to speech
+def read_questions_and_speak(questions):
+    """
+    Iterate through the list of questions, converting each to speech one by one.
+    """
+    for i, question in enumerate(questions):
+        question = sanitize_string(question)
+        if question:  # Ignore empty strings
+            print(f"Speaking Question {i + 1}: {question}")
+            text_to_speech(question, f"question_{i + 1}.mp3")
+            time.sleep(2) 
+    
+# parses the pdf file to get the text and generate questions
 def read_pdf_tables(file_path):
+    """Extracts text from PDF and generates interview questions."""
+    global session_state
 
     text = ""
-    with pdfplumber.open(file_path) as pdf:
-        for page in pdf.pages:
-            page_text = page.extract_text()
-            if page_text:  # Ensure there is text before speaking
-                text += page_text + "\n"
-                ques = generate_interview_questions(
-                    page_text, "Software Engineer")
-                tts_engine.say(page_text)  # Queue the text to be spoken
+    try:
+        with pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
 
-    # tts_engine.runAndWait()  # Process the queued text-to-speech commands
-    return ques
+        if not text.strip():
+            print("⚠️ No text found in the PDF!")
+            return []
 
+        print("PDF Text Extracted. Generating Questions.")
+
+        # Generate questions
+        raw_questions = generate_interview_questions(text, "Software Engineer")
+
+        # Sanitize questions
+        session_state["questions"] = [sanitize_string(q) for q in raw_questions if sanitize_string(q)]
+        session_state["current_question_index"] = 0  # Reset index
+
+        return session_state["questions"]
+
+    except Exception as e:
+        print(f"Error reading PDF: {e}")
+        return []
+
+# function to upload the pdf file to extract questions
+@app.post("/upload-pdf")
+async def upload_pdf(file: UploadFile = File(...)):
+    """Handles PDF upload and extracts questions """
+    global session_state
+
+    file_location = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_location, "wb") as f:
+        f.write(await file.read())
+
+    questions = read_pdf_tables(file_location)
+
+    if not questions:
+        raise HTTPException(status_code=500, detail="Failed to generate questions.")
+
+    return {"message": "Questions generated. Click 'Next Question' to generate audio.", "total_questions": len(questions)}
+
+# function to play the next question only when the button is clicked
+@app.get("/play-next-question")
+async def play_next_question():
+    """Returns the next question's audio file URL which is only generated when the button is clicked."""
+    global session_state
+
+    if not session_state["questions"]:
+        raise HTTPException(status_code=400, detail="No questions available. Please upload a new PDF.")
+
+    if session_state["current_question_index"] >= len(session_state["questions"]):
+        return {"message" : "No more questions available."}
+
+    # Get the next question
+    question_text = session_state["questions"][session_state["current_question_index"]]
+
+    if not question_text or question_text.strip() == "":
+        raise HTTPException(status_code=400, detail="Invalid question text for speech synthesis.")
+
+    print(f"🎙️ Playing Question {session_state['current_question_index'] + 1}: {question_text}")
+
+    # Generate filename based on the current question index and save as static MP3 file
+    filename = f"question_{session_state['current_question_index'] + 1}.mp3"
+
+    # Generate speech only when the button is clicked for that particular question
+    audio_path = text_to_speech(question_text, filename)
+
+    if not audio_path or not os.path.exists(audio_path):
+        raise HTTPException(status_code=500, detail="Generated audio file missing or invalid.")
+
+    # Increment question index after returning the response
+    session_state["current_question_index"] += 1
+
+    return {"audio_url": f"http://127.0.0.1:8000/static/{filename}"}
 
 # def read_docx(file_path):
 #     doc = Document(file_path)
@@ -186,13 +377,14 @@ def read_pdf_tables(file_path):
 # print(read_docx("sample.docx"))
 # calling the main function
 def main():
-    # read_pdf_tables("/Users/kp/capstone/backend/My current resume.pdf")
-    detect_face_confidence()
+    text = read_pdf_tables("/Users/kp/capstone/backend/My current resume.pdf")
+    
+    # detect_face_confidence()
     # df = pd.read_csv("pose_face_data.csv")
     # print(df.head())
     
 
 
 if __name__ == "__main__":
-   
+    main()
     uvicorn.run(app, host="0.0.0.0", port=8000)
