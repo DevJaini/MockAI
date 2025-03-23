@@ -15,7 +15,6 @@
 # # Load environment variables
 # load_dotenv()
 # # OPENAI_API_KEY = os.getenv("OPENAPI_KEY")
-# # openai.api_key = "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"
 
 # # Load spaCy NLP model for entity extraction
 # nlp = spacy.load("en_core_web_sm")
@@ -28,7 +27,6 @@
 # face_mesh = mp_face_mesh.FaceMesh()
 # tts_engine = pyttsx3.init()
 # thisdir = pathlib.Path(__file__).parent.absolute()
-# # client = openai.Client(api_key="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")
 
 # landmark_data = []
 # cap = cv2.VideoCapture(0)
