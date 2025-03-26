@@ -25,6 +25,8 @@ from scipy.io.wavfile import write
 from gtts import gTTS
 import time
 import re
+from datetime import datetime
+import json
 
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -64,6 +66,7 @@ whisper_model = WhisperModel("tiny", compute_type="int8", num_workers=1)
 # defining current directory
 thisdir = pathlib.Path(__file__).parent.absolute()
 client = openai.Client(api_key=os.getenv("OPENAPI_KEY"))
+FACE_LOG_PATH = "face_confidence_log.json"
 
 landmark_data = []
 
@@ -74,6 +77,84 @@ confidence_data = []
 
 FRAME_WIDTH = 640  
 FRAME_HEIGHT = 600
+
+
+
+def append_face_confidence(conf):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    entry = {"timestamp": timestamp, "confidence": conf}
+
+    try:
+        if not os.path.exists(FACE_LOG_PATH):
+            with open(FACE_LOG_PATH, "w") as f:
+                json.dump([entry], f, indent=2)
+        else:
+            with open(FACE_LOG_PATH, "r+") as f:
+                data = json.load(f)
+                data.append(entry)
+                f.seek(0)
+                json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"Error writing face confidence: {e}")
+
+
+def get_average_face_confidence():
+    try:
+        with open(FACE_LOG_PATH, "r") as f:
+            data = json.load(f)
+        if not data:
+            return 0
+        scores = [entry["confidence"] for entry in data]
+        return sum(scores) / len(scores)
+    except Exception as e:
+        print(f"Error reading face log: {e}")
+        return 0
+    
+def calculate_total_score(face_confidence, answer_score, clarity_score, pronunciation_score):
+    w1, w2, w3, w4 = 0.9, 0.7, 0.6, 0.6
+    total = (face_confidence * w1 +
+             answer_score * w2 +
+             clarity_score * w3 +
+             pronunciation_score * w4)
+    return round(total / (w1 + w2 + w3 + w4), 2)  # Normalize
+
+
+@app.post("/final-evaluation")
+async def final_evaluation(
+    file: UploadFile = File(...),
+    question: str = ""
+):
+    # Convert & transcribe
+    converted_wav = await convert_audio(file)
+    segments, _ = whisper_model.transcribe(converted_wav, language="en")
+    transcription = " ".join([segment.text for segment in segments])
+
+    if not transcription:
+        raise HTTPException(status_code=500, detail="Transcription failed.")
+
+    # Evaluate with GPT
+    feedback = evaluate_answer(question, transcription)
+
+    # Extract sample scores (optional: parse actual values using regex/LLM if returned)
+    answer_score = 8
+    clarity_score = 7
+    pronunciation_score = 7
+
+    # Get face confidence avg
+    face_avg = get_average_face_confidence()
+
+    # Final score
+    total_score = calculate_total_score(face_avg, answer_score, clarity_score, pronunciation_score)
+
+    return {
+        "face_avg": round(face_avg, 2),
+        "answer_score": answer_score,
+        "clarity_score": clarity_score,
+        "pronunciation_score": pronunciation_score,
+        "final_score": total_score,
+        "feedback": feedback
+    }
+
 
 #function to decode image
 async def decode_image(img_string):
@@ -92,6 +173,8 @@ async def detect_face_confidence(websocket: WebSocket):
     """ WebSocket connection for face confidence detection """
     await websocket.accept()
     print("Connected to WebSocket")
+
+    last_logged_time = time.time()
 
     try:
         while True:
@@ -149,6 +232,11 @@ async def detect_face_confidence(websocket: WebSocket):
             else:
                 face_confidence = 0  # No face detected
 
+            if time.time() - last_logged_time >= 2:
+                append_face_confidence(face_confidence)
+                last_logged_time = time.time()
+
+                
             # Send confidence score back to React
             await websocket.send_json({"face_confidence": face_confidence})
 
@@ -262,13 +350,13 @@ def text_to_speech(text, output_file):
     file_path = os.path.join(STATIC_DIR, output_file)
 
     if os.path.exists(file_path):
-        print(f"🔊 Reusing existing speech file: {file_path}")
+        print(f" Reusing existing speech file: {file_path}")
         return file_path
 
     try:
         tts = gTTS(text=text, lang="en", slow=False)
         tts.save(file_path)
-        print(f"🔊 Saved speech: {file_path}")
+        print(f" Saved speech: {file_path}")
         return file_path
     except Exception as e:
         print(f"Error generating speech: {e}")
@@ -369,12 +457,48 @@ async def play_next_question():
 
     return {"audio_url": f"http://127.0.0.1:8000/static/{filename}"}
 
-# def read_docx(file_path):
-#     doc = Document(file_path)
-#     text = "\n".join([para.text for para in doc.paragraphs])
-#     return text
+def evaluate_answer(question: str, answer: str):
+    messages = [
+        {"role": "system", "content": "You are an AI interview coach. Evaluate the given response to the interview question. Provide detailed feedback and a score (1-10) for clarity, relevance, and technical depth."},
+        {"role": "user", "content": f"Question: {question}\n\nAnswer: {answer}"}
+    ]
+    
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages
+    )
+    
+    return response.choices[0].message.content
 
-# print(read_docx("sample.docx"))
+
+@app.post("/evaluate-response")
+async def evaluate_response(file: UploadFile = File(...), question: str = ""):
+    """Uploads user's spoken answer, transcribes it, and sends it to GPT for evaluation"""
+    converted_wav = await convert_audio(file)
+
+    if not converted_wav:
+        raise HTTPException(status_code=500, detail="Audio conversion failed")
+
+    segments, _ = whisper_model.transcribe(converted_wav, language="en")
+    transcription = " ".join([segment.text for segment in segments])
+
+    if not transcription:
+        raise HTTPException(status_code=500, detail="Transcription failed")
+
+    feedback = evaluate_answer(question, transcription)
+
+    return {
+        "transcription": transcription,
+        "evaluation": feedback
+    }
+
+
+def read_docx(file_path):
+    doc = Document(file_path)
+    text = "\n".join([para.text for para in doc.paragraphs])
+    return text
+
+
 # calling the main function
 def main():
     text = read_pdf_tables("/Users/kp/capstone/backend/My current resume.pdf")
