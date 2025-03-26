@@ -9,16 +9,53 @@ const ResumeUploader = () => {
 
   const [resume, setResume] = useState(null);
   const [jobDescription, setJobDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleResumeChange = (e) => {
     setResume(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Resume file:", resume);
     console.log("Job Description:", jobDescription);
-    navigate("/interview");
+
+    if (!resume || !jobDescription) {
+      alert("Please upload a resume and enter job description.");
+      return;
+    }
+
+    setIsLoading(true); // 🟢 Start loading
+
+    const formData = new FormData();
+    formData.append("file", resume);
+    formData.append("job_description", jobDescription);
+
+    try {
+      const response = await fetch("http://localhost:8000/upload-resume", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("❌ Backend error:", data);
+        alert(data.detail || "Something went wrong.");
+        return;
+      }
+
+      console.log("✅ Upload success:", data);
+      // Navigate to interview page
+      navigate("/interview");
+    } catch (error) {
+      console.error("❌ Upload failed:", error);
+      alert("Server error. Please try again.");
+    } finally {
+      setIsLoading(false); // 🔴 Stop loading after everything
+    }
+
+    // navigate("/interview");
   };
 
   return (
@@ -73,11 +110,22 @@ const ResumeUploader = () => {
             />
           </div>
 
-          <button
+          {/* <button
             type="submit"
             className="w-full px-6 py-3 bg-purple-500 text-white font-bold rounded-lg shadow-md hover:bg-purple-600 transition transform hover:scale-105"
           >
-            Start Your Interview! Be Ready!
+            Start Your Interview
+          </button> */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`w-full px-6 py-3 font-bold rounded-lg shadow-md transition transform ${
+              isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-purple-500 text-white hover:bg-purple-600 hover:scale-105"
+            }`}
+          >
+            {isLoading ? "Analyzing Resume..." : "Start Your Interview"}
           </button>
         </form>
       </div>
