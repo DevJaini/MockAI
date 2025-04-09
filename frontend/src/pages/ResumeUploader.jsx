@@ -3,14 +3,14 @@ import { heroBackground } from "../assets";
 import Section from "../components/Section";
 import { Rings } from "../components/design/Hero";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const ResumeUploader = () => {
   const navigate = useNavigate();
 
   const [resume, setResume] = useState(null);
   const [jobDescription, setJobDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isUploaded, setIsUploaded] = useState(false); // Track upload status
 
   const handleResumeChange = (e) => {
     setResume(e.target.files[0]);
@@ -18,15 +18,14 @@ const ResumeUploader = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Resume file:", resume);
-    console.log("Job Description:", jobDescription);
 
     if (!resume || !jobDescription) {
       alert("Please upload a resume and enter job description.");
       return;
     }
 
-    setIsLoading(true); // 🟢 Start loading
+    setIsAnalyzing(true);
+    setIsUploaded(false);
 
     const formData = new FormData();
     formData.append("file", resume);
@@ -43,20 +42,21 @@ const ResumeUploader = () => {
       if (!response.ok) {
         console.error("❌ Backend error:", data);
         alert(data.detail || "Something went wrong.");
+        setIsAnalyzing(false);
         return;
       }
 
       console.log("✅ Upload success:", data);
-      // Navigate to interview page
-      navigate("/interview");
+      setIsUploaded(true); // Show "Start Interview" button
     } catch (error) {
       console.error("❌ Upload failed:", error);
       alert("Server error. Please try again.");
-    } finally {
-      setIsLoading(false); // 🔴 Stop loading after everything
+      setIsAnalyzing(false);
     }
+  };
 
-    // navigate("/interview");
+  const handleStartInterview = () => {
+    navigate("/interview");
   };
 
   return (
@@ -95,7 +95,6 @@ const ResumeUploader = () => {
               className="w-full p-3 border border-gray-300 rounded-lg shadow-sm text-white"
               required
             />
-            <span className="text-sm">Upload PDF, DOC, DOCX up to 5 MB</span>
           </div>
 
           <div className="text-left">
@@ -107,30 +106,82 @@ const ResumeUploader = () => {
               onChange={(e) => setJobDescription(e.target.value)}
               rows="4"
               className="w-full p-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900"
-              placeholder="Enter the job description"
+              placeholder="Enter the job description..."
               required
             />
           </div>
 
-          {/* <button
-            type="submit"
-            className="w-full px-6 py-3 bg-purple-500 text-white font-bold rounded-lg shadow-md hover:bg-purple-600 transition transform hover:scale-105"
-          >
-            Start Your Interview
-          </button> */}
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isAnalyzing}
             className={`w-full px-6 py-3 font-bold rounded-lg shadow-md transition transform ${
-              isLoading
+              isAnalyzing
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-purple-500 text-white hover:bg-purple-600 hover:scale-105"
             }`}
           >
-            {isLoading ? "Analyzing Resume..." : "Start Your Interview"}
+            {isAnalyzing ? "Analyzing Resume..." : "Submit Resume"}
           </button>
         </form>
       </div>
+
+      {/* Instruction Modal */}
+      {(isAnalyzing || isUploaded) && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-8 w-[90%] max-w-xl text-left animate-fadeIn">
+            <h3 className="text-3xl font-bold text-purple-700 mb-4">
+              Interview Instructions
+            </h3>
+            <ul className="list-disc list-inside text-gray-800 space-y-3 text-lg">
+              <li>
+                You will be asked <strong>8 interview questions</strong>.
+              </li>
+              <li>
+                Total interview time is <strong>30 minutes</strong>.
+              </li>
+              <li>
+                Click <strong>“Next Question”</strong> to proceed after
+                answering each question.
+              </li>
+              <li>All answers will be recorded for analysis.</li>
+              <li>
+                You may end the interview early, but evaluation will be based
+                only on attempted answers.
+              </li>
+              <li>
+                Keep your face centered and speak clearly for best results.
+              </li>
+              <li>
+                Make sure your camera and microphone are working properly.
+              </li>
+            </ul>
+
+            <p className="mt-6 text-sm text-gray-600">
+              Don’t worry — this is for practice and growth. Just do your best!
+              😊
+            </p>
+
+            <div className="mt-6 flex justify-end">
+              {isUploaded ? (
+                <button
+                  onClick={handleStartInterview}
+                  className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition"
+                >
+                  Start Your Interview
+                </button>
+              ) : (
+                <button
+                  disabled
+                  className="px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold cursor-not-allowed"
+                >
+                  Analyzing Resume...
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <Rings />
     </Section>
   );
