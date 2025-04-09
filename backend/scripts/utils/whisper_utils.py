@@ -2,9 +2,18 @@ import os
 from faster_whisper import WhisperModel
 from pydub import AudioSegment
 import io
-import traceback
 
 model = WhisperModel("tiny", compute_type="int8")
+
+def get_mispronounced_words(segments):
+    mispronounced = []
+    for segment in segments:
+        for word in getattr(segment, "words", []):
+            if word.probability and word.probability < 0.75:
+                mispronounced.append({
+                    "word": word.word.strip()
+                })
+    return mispronounced
 
 async def transcribe_audio(file):
     try:
@@ -24,13 +33,14 @@ async def transcribe_audio(file):
         buffer.seek(0)
 
         print("🎙️ Transcribing with Whisper...")
-        segments, _ = model.transcribe(buffer, language="en")
+        segments, info = model.transcribe(buffer, language="en", word_timestamps=True)
         transcript = " ".join([s.text for s in segments])
+        mispronounced = get_mispronounced_words(segments)
+
         print("📝 Transcript:", transcript)
 
-        return transcript
+        return transcript, mispronounced
 
     except Exception as e:
         print("❌ Transcription Error:", str(e))
-        traceback.print_exc()
         raise e

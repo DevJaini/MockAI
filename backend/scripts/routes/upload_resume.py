@@ -4,9 +4,31 @@ from scripts.utils.nlp_utils import extract_keywords
 import os
 import pdfplumber
 from docx import Document
+import json
+from main import EVALUATION_LOG_PATH, FACE_LOG_PATH
+import glob
 
 router = APIRouter()
 session_state = {"questions": [], "current_index": 0}
+
+def reset_interview_logs():
+    # Clear previous evaluations
+    with open(EVALUATION_LOG_PATH, "w") as f:
+        json.dump([], f)
+
+    # Clear face confidence log
+    with open(FACE_LOG_PATH, "w") as f:
+        json.dump([], f)
+
+    # 3. Remove generated question MP3s
+    mp3_files = glob.glob(os.path.join("static", "question_*.mp3"))
+    for file_path in mp3_files:
+        try:
+            os.remove(file_path)
+            print(f"🧹 Removed: {file_path}")
+        except Exception as e:
+            print(f"❌ Failed to delete {file_path}: {e}")
+
 
 def extract_text_from_pdf(file_path):
     print("📄 Extracting text from PDF...")
@@ -30,6 +52,7 @@ def extract_text_from_docx(file_path):
 
 @router.post("/upload-resume")
 async def upload_resume(file: UploadFile = File(...), job_description: str = Form(...)):
+    reset_interview_logs()
     print("🔁 API Call: /upload-resume")
     print(f"📄 Filename: {file.filename}")
     print(f"📝 Job Description (preview): {job_description[:100]}...")
@@ -65,4 +88,8 @@ async def upload_resume(file: UploadFile = File(...), job_description: str = For
     session_state["questions"] = questions
     session_state["current_index"] = 0
 
-    return {"total_questions": len(questions)}
+    return {
+        "message": "Questions generated successfully",
+        "total_questions": len(questions),
+        "questions": questions
+    }

@@ -2,3 +2,6 @@
 **/.env
 static/
 uploads/
+__pycache__/
+evaluation.json
+face_confidence_log.json

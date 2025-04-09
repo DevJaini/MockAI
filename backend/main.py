@@ -7,6 +7,10 @@ import os
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("static", exist_ok=True)
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # This will point to /backend
+EVALUATION_LOG_PATH = os.path.join(BASE_DIR, "evaluation.json")
+FACE_LOG_PATH = os.path.join(BASE_DIR, "face_confidence_log.json")
+
 app = FastAPI()
 
 # CORS middleware for frontend communication

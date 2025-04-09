@@ -28,6 +28,11 @@ const Interview = () => {
   // 📷 Start camera
   const startCamera = async () => {
     try {
+      // Stop any previous stream
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: false,
@@ -35,6 +40,12 @@ const Interview = () => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
+      // For Safari and older browsers: ensure play
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((e) => console.warn("Auto-play was prevented:", e));
+      }
+
       streamRef.current = stream;
       setIsCameraOn(true);
     } catch (error) {
