@@ -3,21 +3,36 @@ import { heroBackground } from "../assets";
 import Section from "../components/Section";
 import { Rings } from "../components/design/Hero";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const ResumeUploader = () => {
   const navigate = useNavigate();
 
   const [resume, setResume] = useState(null);
   const [jobDescription, setJobDescription] = useState("");
+  const [error, setError] = useState("");
 
   const handleResumeChange = (e) => {
     setResume(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Resume file:", resume);
-    console.log("Job Description:", jobDescription);
+    setError("");
+
+    const formData = new FormData();
+    formData.append("resume", resume);
+    formData.append("job_desc", jobDescription);
+
+    // try {
+    //   await axios.post("http://127.0.0.1:8000/process_resume/", formData, {
+    //     headers: { "Content-Type": "multipart/form-data" },
+    //   });
+    //   navigate("/interview");
+    // } catch (error) {
+    //   console.error("Error:", error);
+    //   setError("Failed to submit resume. Please try again.");
+    // }
     navigate("/interview");
   };
 
@@ -57,6 +72,7 @@ const ResumeUploader = () => {
               className="w-full p-3 border border-gray-300 rounded-lg shadow-sm text-white"
               required
             />
+            <span className="text-sm">Upload PDF, DOC, DOCX up to 5 MB</span>
           </div>
 
           <div className="text-left">
@@ -68,10 +84,12 @@ const ResumeUploader = () => {
               onChange={(e) => setJobDescription(e.target.value)}
               rows="4"
               className="w-full p-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900"
-              placeholder="Enter the job description..."
+              placeholder="Enter the job description"
               required
             />
           </div>
+
+          {error && <p className="text-red-400">{error}</p>}
 
           <button
             type="submit"
