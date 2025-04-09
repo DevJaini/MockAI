@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 import json
 from main import EVALUATION_LOG_PATH
+from scripts.utils.openai_utils import summarize_feedback_with_gpt 
 
 router = APIRouter()
 
@@ -33,18 +34,11 @@ async def get_report():
         "average_final_score": round(sum_final / total, 2)
     }
 
-    # Combine feedbacks from all
-    all_feedbacks = []
-    for entry in data:
-        fb = entry.get("feedback", {})
-        if isinstance(fb, dict):
-            gpt = fb.get("gpt", "")
-            claude = fb.get("claude", "")
-            all_feedbacks.append(f"- GPT: {gpt}\n- Claude: {claude}")
-        elif isinstance(fb, str):
-            all_feedbacks.append(fb)
+    # Extract all GPT and Claude feedbacks
+    gpt_feedbacks = [entry["feedback"]["gpt"] for entry in data if "feedback" in entry and "gpt" in entry["feedback"]]
+    claude_feedbacks = [entry["feedback"]["claude"] for entry in data if "feedback" in entry and "claude" in entry["feedback"]]
 
-    overall_feedback = "\n\n".join(all_feedbacks)
+    overall_feedback = summarize_feedback_with_gpt(gpt_feedbacks, claude_feedbacks)
 
     return {
         "evaluations": data,

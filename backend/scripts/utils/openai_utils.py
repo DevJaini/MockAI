@@ -121,3 +121,34 @@ def evaluate_with_claude(question: str, answer: str):
     except Exception as e:
         print("❌ Claude Evaluation Error:", e)
         return {"clarity": 0, "technical_depth": 0, "structure": 0, "feedback": str(e)}
+    
+def summarize_feedback_with_gpt(gpt_feedbacks, claude_feedbacks):
+    combined_prompt = f"""
+    You are an expert interview coach.
+
+    Below is a list of feedbacks generated from GPT and Claude for 8 interview questions.
+
+    GPT Feedbacks:
+    {json.dumps(gpt_feedbacks, indent=2)}
+
+    Claude Feedbacks:
+    {json.dumps(claude_feedbacks, indent=2)}
+
+    Now please summarize the candidate's overall performance, key strengths, and improvement areas based on both models. Output should be 1 paragraph of final overall feedback.
+    """
+
+    try:
+        response = client_openai.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a helpful interview evaluator."},
+                {"role": "user", "content": combined_prompt}
+            ]
+        )
+
+        return response.choices[0].message.content.strip()
+
+    except Exception as e:
+        print("❌ GPT Summary Error:", e)
+        return "Unable to generate summary due to an error."
+

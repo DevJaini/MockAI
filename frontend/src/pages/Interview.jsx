@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Section from "../components/Section";
+// import AudioRecorder from "../components/AudioRecorder";
 
 const Interview = () => {
   const navigate = useNavigate();
@@ -9,13 +10,29 @@ const Interview = () => {
   const streamRef = useRef(null);
 
   const [isCameraOn, setIsCameraOn] = useState(false);
-  const [timer, setTimer] = useState(0);
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [isInterviewStarted, setIsInterviewStarted] = useState(false);
-  const [user, setUser] = useState(null);
-
+  const [timer, setTimer] = useState(() => {
+    const saved = localStorage.getItem("interview-timer");
+    return saved ? parseInt(saved, 10) : 1800;
+  });
+  const [currentQuestion, setCurrentQuestion] = useState("");
   const [audioUrl, setAudioUrl] = useState(null);
+  const [isInterviewStarted, setIsInterviewStarted] = useState(
+    () => localStorage.getItem("interview-started") === "true"
+  );
+  const [questionIndex, setQuestionIndex] = useState(() => {
+    const saved = localStorage.getItem("interview-question-index");
+    return saved ? parseInt(saved, 10) : 0;
+  });
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(false);
+  const [attemptedQuestions, setAttemptedQuestions] = useState(() => {
+    const saved = localStorage.getItem("interview-attempted");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [totalQuestions, setTotalQuestions] = useState(8);
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const chunksRef = useRef([]);
+  const [user, setUser] = useState(null);
 
   // 🔁 Get user info from localStorage
   useEffect(() => {
@@ -65,21 +82,33 @@ const Interview = () => {
     setIsCameraOn(false);
   };
 
-  // 💡 Stop camera when leaving route
   useEffect(() => {
+    if (isInterviewStarted && timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => {
+          const updated = prev - 1;
+          localStorage.setItem("interview-timer", updated);
+          return updated;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    } else if (timer === 0) {
+      handleGenerateResult(true);
+    }
+
     if (location.pathname !== "/interview") {
       stopCamera();
     }
-  }, [location]);
+  }, [isInterviewStarted, timer, location]);
 
-  // ⏲ Interview timer
-  useEffect(() => {
-    let interval;
-    if (timer > 0) {
-      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    }
-    return () => clearInterval(interval);
-  }, [timer]);
+  // // ⏲ Interview timer
+  // useEffect(() => {
+  //   let interval;
+  //   if (timer > 0) {
+  //     interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+  //   }
+  //   return () => clearInterval(interval);
+  // }, [timer]);
 
   // 🚀 Fetch next question from backend
   const fetchNextQuestion = async () => {
@@ -90,7 +119,13 @@ const Interview = () => {
 
       if (data.audio_url) {
         console.log("🎧 Playing:", data.audio_url);
+        setCurrentQuestion(data.question_text);
         setAudioUrl(data.audio_url);
+        setAttemptedQuestions((prev) => {
+          const updated = prev + 1;
+          localStorage.setItem("interview-attempted", updated);
+          return updated;
+        });
       } else {
         alert(data.message || "No more questions.");
       }
@@ -105,30 +140,72 @@ const Interview = () => {
   // ▶️ Start interview
   const handleStartInterview = async () => {
     setIsInterviewStarted(true);
-    setTimer(600); // 10 mins
+    localStorage.setItem("interview-started", "true");
+    localStorage.setItem("interview-question-index", questionIndex);
+    // setTimer(600); // 10 mins
     setQuestionIndex(0);
     await fetchNextQuestion(); // play question 1
   };
 
   // ⏭ Next question
   const handleNextQuestion = async () => {
-    setQuestionIndex((prev) => prev + 1);
-    await fetchNextQuestion();
+    if (questionIndex + 1 < totalQuestions) {
+      const nextIndex = questionIndex + 1;
+      setQuestionIndex(nextIndex);
+      localStorage.setItem("interview-question-index", nextIndex);
+      await fetchNextQuestion();
+    }
   };
 
-  const handleGenerateResult = () => {
+  const handleGenerateResult = (timeout = false) => {
     stopCamera();
-    setTimer(0);
-    setIsInterviewStarted(false);
+    localStorage.clear();
+    if (timeout) alert("⏰ 30 minutes is over. Showing evaluation so far.");
     navigate("/results");
   };
 
   const handleEndInterview = () => {
     stopCamera();
-    setTimer(0);
-    setIsInterviewStarted(false);
-    alert("Interview Ended!");
-    navigate("/");
+    localStorage.clear();
+    alert("Interview Ended! Showing attempted questions evaluation.");
+    navigate("/results");
+  };
+
+  const toggleRecording = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    } else {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        chunksRef.current = [];
+        const formData = new FormData();
+        formData.append("file", blob, "answer.webm");
+        formData.append("question", currentQuestion);
+
+        try {
+          const res = await fetch("http://localhost:8000/submit-answer", {
+            method: "POST",
+            body: formData,
+          });
+          const result = await res.json();
+          console.log("✅ Evaluation Result:", result);
+        } catch (err) {
+          console.error("❌ Evaluation error:", err);
+        }
+      };
+
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+    }
   };
 
   return (
@@ -170,17 +247,33 @@ const Interview = () => {
             <div className="text-xl text-white mb-2">
               {isInterviewStarted ? (
                 <>
-                  <div>
-                    Time Remaining: {Math.floor(timer / 60)}:{timer % 60}
+                  <div className="text-xl text-white mb-4">
+                    Time Remaining: {Math.floor(timer / 60)}:
+                    {String(timer % 60).padStart(2, "0")}
                   </div>
                   <div className="text-white mt-4 mb-2">
                     {isLoadingQuestion ? (
                       "Loading question..."
                     ) : audioUrl ? (
-                      <audio controls autoPlay src={audioUrl}>
-                        <source src={audioUrl} type="audio/mpeg" />
-                        Your browser does not support audio.
-                      </audio>
+                      <div>
+                        <p className="mb-2 font-semibold">
+                          Question: {currentQuestion}
+                        </p>
+                        <audio src={audioUrl} autoPlay hidden />
+
+                        <button
+                          onClick={toggleRecording}
+                          className={`mt-3 px-4 py-2 font-semibold rounded-md ${
+                            isRecording
+                              ? "bg-red-600 text-white"
+                              : "bg-green-600 text-white"
+                          }`}
+                        >
+                          {isRecording
+                            ? "⏹ Stop Recording"
+                            : "🎙 Start Recording"}
+                        </button>
+                      </div>
                     ) : (
                       "Waiting for question..."
                     )}
@@ -213,21 +306,23 @@ const Interview = () => {
                 </button>
               )}
 
-              {isInterviewStarted && (
+              {isCameraOn && isInterviewStarted && (
                 <>
-                  <button
-                    onClick={handleNextQuestion}
-                    className="px-6 py-3 bg-purple-500 text-white font-bold rounded-lg shadow-md hover:bg-purple-600 transition"
-                  >
-                    Next Question
-                  </button>
-
-                  <button
-                    onClick={handleGenerateResult}
-                    className="px-6 py-3 bg-yellow-500 text-white font-bold rounded-lg shadow-md hover:bg-yellow-600 transition"
-                  >
-                    Generate Evaluation
-                  </button>
+                  {questionIndex + 1 < totalQuestions ? (
+                    <button
+                      onClick={handleNextQuestion}
+                      className="px-6 py-3 bg-purple-500 text-white font-bold rounded-lg shadow-md hover:bg-purple-600 transition"
+                    >
+                      Next Question
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleGenerateResult(false)}
+                      className="px-6 py-3 bg-yellow-500 text-white font-bold rounded-lg shadow-md hover:bg-yellow-600 transition"
+                    >
+                      Generate Evaluation
+                    </button>
+                  )}
 
                   <button
                     onClick={handleEndInterview}
