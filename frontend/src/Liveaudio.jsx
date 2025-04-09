@@ -124,11 +124,23 @@ const RecordAudio = () => {
             )}
 
             {evaluation && (
-                <div>
-                    <h3>Evaluation:</h3>
-                    <pre>{JSON.stringify(evaluation, null, 2)}</pre>
+                <div style={{ marginTop: "20px", padding: "10px", backgroundColor: "#f9f9f9", borderRadius: "8px" }}>
+                    <h3>Ensemble Evaluation Summary:</h3>
+                    <p><strong>Final Score:</strong> {evaluation.final_score}</p>
+                    <p><strong>ChatGPT Score:</strong> {evaluation.gpt_score}</p>
+                    <p><strong>Claude Score:</strong> {evaluation.claude_score}</p>
+
+                    <h4>ChatGPT Feedback:</h4>
+                    <p>{evaluation.gpt_feedback}</p>
+
+                    <h4>Claude Feedback:</h4>
+                    <p>{evaluation.claude_feedback}</p>
+
+                    <h4>Combined Feedback:</h4>
+                    <p>{evaluation.combined_feedback}</p>
                 </div>
             )}
+
 
             {finalScore && (
                 <div>
@@ -138,10 +150,16 @@ const RecordAudio = () => {
                     <p><strong>Clarity Score:</strong> {finalScore.clarity_score}</p>
                     <p><strong>Pronunciation Score:</strong> {finalScore.pronunciation_score}</p>
                     <p><strong>Final Score:</strong> {finalScore.final_score}</p>
+
                     <h4>AI Feedback:</h4>
-                    <pre>{finalScore.feedback}</pre>
+                    <ul>
+                        {Object.entries(finalScore.feedback).map(([key, value]) => (
+                            <li key={key}><strong>{key}:</strong> {value}</li>
+                        ))}
+                    </ul>
                 </div>
             )}
+
         </div>
     );
 };

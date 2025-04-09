@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 import openai
 import mediapipe as mp
 import numpy as np
-import pandas as pd
 import cv2
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,17 +15,17 @@ import base64
 from PIL import Image
 import uvicorn
 import io
-import soundfile as sf
 from faster_whisper import WhisperModel
 from pydub import AudioSegment
-import librosa
-import wave
 from scipy.io.wavfile import write
 from gtts import gTTS
 import time
 import re
 from datetime import datetime
 import json
+import anthropic
+from typing import Dict, Tuple
+import random
 
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -66,7 +65,9 @@ whisper_model = WhisperModel("tiny", compute_type="int8", num_workers=1)
 # defining current directory
 thisdir = pathlib.Path(__file__).parent.absolute()
 client = openai.Client(api_key=os.getenv("OPENAPI_KEY"))
+client_claude = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_KEY"))
 FACE_LOG_PATH = "face_confidence_log.json"
+EVALUATION_LOG = "evaluation.json"
 
 landmark_data = []
 
@@ -78,7 +79,31 @@ confidence_data = []
 FRAME_WIDTH = 640  
 FRAME_HEIGHT = 600
 
+def append_evaluation_log(question: str, transcription: str, feedback: str):
 
+    sanitize_feedback = sanitize_string(feedback)
+
+    log_entry = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "question": question,
+        "answer_transcription": transcription,
+        "feedback": sanitize_feedback
+    }
+
+    try:
+        if not os.path.exists(EVALUATION_LOG):
+            with open(EVALUATION_LOG, "w") as f:
+                json.dump([log_entry], f, indent=2)
+        else:
+            with open(EVALUATION_LOG, "r+") as f:
+                data = json.load(f)
+                data.append(log_entry)
+                f.seek(0)
+                json.dump(data, f, indent=2)
+
+        print("Feedback appended to evaluation log.")
+    except Exception as e:
+        print(f"Error writing evaluation log: {e}")
 
 def append_face_confidence(conf):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -97,7 +122,6 @@ def append_face_confidence(conf):
     except Exception as e:
         print(f"Error writing face confidence: {e}")
 
-
 def get_average_face_confidence():
     try:
         with open(FACE_LOG_PATH, "r") as f:
@@ -111,20 +135,19 @@ def get_average_face_confidence():
         return 0
     
 def calculate_total_score(face_confidence, answer_score, clarity_score, pronunciation_score):
-    w1, w2, w3, w4 = 0.9, 0.7, 0.6, 0.6
+    w1, w2, w3, w4 = 0.5, 0.9, 0.3, 0.8
     total = (face_confidence * w1 +
              answer_score * w2 +
              clarity_score * w3 +
              pronunciation_score * w4)
     return round(total / (w1 + w2 + w3 + w4), 2)  # Normalize
 
-
 @app.post("/final-evaluation")
 async def final_evaluation(
     file: UploadFile = File(...),
     question: str = ""
 ):
-    # Convert & transcribe
+    # Step 1: Transcribe audio
     converted_wav = await convert_audio(file)
     segments, _ = whisper_model.transcribe(converted_wav, language="en")
     transcription = " ".join([segment.text for segment in segments])
@@ -132,28 +155,49 @@ async def final_evaluation(
     if not transcription:
         raise HTTPException(status_code=500, detail="Transcription failed.")
 
-    # Evaluate with GPT
-    feedback = evaluate_answer(question, transcription)
+    # Step 2: Evaluate using GPT & Claude
+    gpt_result = evaluate_with_chatgpt(question, transcription)
+    claude_result = evaluate_with_claude(question, transcription)
 
-    # Extract sample scores (optional: parse actual values using regex/LLM if returned)
-    answer_score = 8
-    clarity_score = 7
-    pronunciation_score = 7
+    # Step 3: Extract detailed scores
+    clarity_scores = [gpt_result.get("clarity", 0), claude_result.get("clarity", 0)]
+    technical_scores = [gpt_result.get("technical_depth", 0), claude_result.get("technical_depth", 0)]
+    structure_scores = [gpt_result.get("structure", 0), claude_result.get("structure", 0)]
 
-    # Get face confidence avg
+    # Step 4: Weighted average answer_score
+    clarity_score = round(sum(clarity_scores) / len(clarity_scores), 2)
+    technical_score = round(sum(technical_scores) / len(technical_scores), 2)
+    structure_score = round(sum(structure_scores) / len(structure_scores), 2)
+
+    # Assign custom weights for answer quality breakdown
+    answer_score = round((clarity_score * 0.3 + technical_score * 0.4 + structure_score * 0.3), 2)
+
+    pronunciation_score = 7  
     face_avg = get_average_face_confidence()
 
-    # Final score
-    total_score = calculate_total_score(face_avg, answer_score, clarity_score, pronunciation_score)
+    final_score = calculate_total_score(face_avg, answer_score, clarity_score, pronunciation_score)
+
+    feedback_combined = {
+        "clarity": gpt_result.get("clarity_feedback", "N/A"),
+        "technical_depth": gpt_result.get("technical_depth_feedback", "N/A"),
+        "structure": gpt_result.get("structure_feedback", "N/A"),
+        "improvement_suggestions": f"{gpt_result.get('feedback')} | {claude_result.get('feedback')}"
+    }
+
+    append_evaluation_log(question, transcription, feedback_combined)
 
     return {
+        "transcription": transcription,
         "face_avg": round(face_avg, 2),
-        "answer_score": answer_score,
         "clarity_score": clarity_score,
+        "technical_score": technical_score,
+        "structure_score": structure_score,
+        "answer_score": answer_score,
         "pronunciation_score": pronunciation_score,
-        "final_score": total_score,
-        "feedback": feedback
+        "final_score": final_score,
+        "feedback": feedback_combined
     }
+
 
 
 #function to decode image
@@ -236,7 +280,7 @@ async def detect_face_confidence(websocket: WebSocket):
                 append_face_confidence(face_confidence)
                 last_logged_time = time.time()
 
-                
+
             # Send confidence score back to React
             await websocket.send_json({"face_confidence": face_confidence})
 
@@ -343,6 +387,44 @@ def generate_interview_questions(resume_text, job_description):
     )
     print(response.choices[0].message.content.split("\n"))
     return response.choices[0].message.content.split("\n")
+
+def generate_interview_questions_claude(resume_text, job_description):
+    prompt = f"""
+        You are an AI job interview coach. Generate 5 technical and behavioral interview questions 
+        based on the following resume and job description:
+
+        Resume:
+        {resume_text}
+
+        Job Description:
+        {job_description}
+
+        Format your response as:
+        1. [Question]
+        2. [Question]
+        3. [Question]
+        4. [Question]
+        5. [Question]
+    """
+
+        # Claude's message structure
+    message = client.messages.create(
+    model="claude-3-sonnet-20240229",  # You can also use 'claude-3-opus-20240229' or 'claude-3-haiku-20240307'
+    max_tokens=1024,
+    temperature=0.5,
+    messages=[
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ]
+    )
+
+    output_text = message.content[0].text  # Get plain text response
+    questions = [line.strip() for line in output_text.split("\n") if line.strip()]
+        
+    print("\n".join(questions))  # Debug print
+    return questions
 
 # function to convert text to speech
 def text_to_speech(text, output_file):
@@ -457,18 +539,125 @@ async def play_next_question():
 
     return {"audio_url": f"http://127.0.0.1:8000/static/{filename}"}
 
-def evaluate_answer(question: str, answer: str):
-    messages = [
-        {"role": "system", "content": "You are an AI interview coach. Evaluate the given response to the interview question. Provide detailed feedback and a score (1-10) for clarity, relevance, and technical depth."},
-        {"role": "user", "content": f"Question: {question}\n\nAnswer: {answer}"}
-    ]
-    
+# Dynamic system prompt generator
+def generate_system_prompt(criteria: Dict[str, Dict[int, str]], role_description: str) -> Tuple[str, Dict[str, int]]:
+    preferences = {key: random.randint(1, 5) for key in criteria}
+    descriptions = {key: criteria[key][val] for key, val in preferences.items()}
+    prompt = f"{role_description} with the following preferences: {json.dumps(descriptions, ensure_ascii=False)}"
+    return prompt, preferences
+
+# Evaluation criteria for interview scoring
+criteria = {
+    "clarity": {
+        1: "Prefers concise and minimal answers",
+        2: "Values short but complete responses",
+        3: "Likes balanced answers with good explanation",
+        4: "Prefers detailed and descriptive answers",
+        5: "Wants deeply detailed, step-by-step responses"
+    },
+    "technical_depth": {
+        1: "Basic explanation is enough",
+        2: "Values surface-level technical points",
+        3: "Balanced depth and breadth",
+        4: "Wants strong technical justification",
+        5: "Seeks deep knowledge and thorough explanations"
+    },
+    "structure": {
+        1: "Unstructured or casual answers are fine",
+        2: "Basic logical flow preferred",
+        3: "Likes moderate structure",
+        4: "Wants well-organized answers",
+        5: "Demands strong structure with intro-body-summary format"
+    }
+}
+
+# Generate system prompts
+chatgpt_system_prompt, _ = generate_system_prompt(criteria, "You are an AI interview evaluator")
+claude_system_prompt, _ = generate_system_prompt(criteria, "You are a Claude-based interview evaluator")
+
+
+def evaluate_with_chatgpt(question: str, answer: str) -> Dict:
+    prompt = f"""
+You are an expert AI interview evaluator. Based on the candidate's response to the question below, return a detailed evaluation in JSON format.
+
+Evaluate the answer on three dimensions (scale 1–10):
+- clarity
+- technical_depth
+- structure
+
+Then, provide constructive feedback as a string.
+
+Respond ONLY with valid JSON in this format:
+{{
+  "clarity": <1-10>,
+  "technical_depth": <1-10>,
+  "structure": <1-10>,
+  "feedback": "<summary and suggestions>"
+}}
+
+Question: {question}
+Answer: {answer}
+"""
+
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=messages
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": chatgpt_system_prompt},
+            {"role": "user", "content": prompt}
+        ]
     )
-    
-    return response.choices[0].message.content
+
+    try:
+        return json.loads(response.choices[0].message.content.strip())
+    except Exception as e:
+        return {
+            "clarity": 0,
+            "technical_depth": 0,
+            "structure": 0,
+            "feedback": f"Parsing error: {str(e)}\nRaw: {response.choices[0].message.content}"
+        }
+
+
+def evaluate_with_claude(question: str, answer: str) -> Dict:
+    prompt = f"""
+You are a Claude-based AI interview evaluator. Based on the candidate's response, evaluate three dimensions (scale 1–10):
+
+- clarity
+- technical_depth
+- structure
+
+Provide your answer strictly in JSON like this:
+{{
+  "clarity": <1-10>,
+  "technical_depth": <1-10>,
+  "structure": <1-10>,
+  "feedback": "<overall feedback with suggestions>"
+}}
+
+Question: {question}
+Answer: {answer}
+"""
+
+    response = client_claude.messages.create(
+        model="claude-3-5-sonnet-latest", 
+        max_tokens=512,
+        temperature=0.7,
+        system=claude_system_prompt,
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    content = response.content[0].text.strip()
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        return {
+            "clarity": 0,
+            "technical_depth": 0,
+            "structure": 0,
+            "feedback": f"Invalid response from Claude: {content}"
+        }
 
 
 @app.post("/evaluate-response")
@@ -485,12 +674,52 @@ async def evaluate_response(file: UploadFile = File(...), question: str = ""):
     if not transcription:
         raise HTTPException(status_code=500, detail="Transcription failed")
 
-    feedback = evaluate_answer(question, transcription)
+    # feedback = evaluate_answer(question, transcription)
+    # feedback_claude = evaluate_answer_claude(question, transcription)
+    # print(question)
+    # append_evaluation_log(question, transcription, feedback)
+
+    # return {
+    #     "transcription": transcription,
+    #     "gpt_evaluation": feedback,
+    #     "claude_evaluation": feedback_claude
+    # }
+     # GPT & Claude evaluations
+    gpt_result = evaluate_with_chatgpt(question, transcription)
+    claude_result = evaluate_with_claude(question, transcription)
+
+    # Ensemble score (average)
+    scores = [gpt_result.get("score", 0), claude_result.get("score", 0)]
+    scores = [s for s in scores if isinstance(s, (int, float))]  # safe filter
+    final_score = round(sum(scores) / len(scores), 2) if scores else "N/A"
+
+    # Combine feedback
+    feedback_combined = f"""
+     GPT Feedback: {gpt_result.get("feedback")}
+     Claude Feedback: {claude_result.get("feedback")}
+    """
+
+    # Optional: log full results
+    append_evaluation_log(question, transcription, feedback_combined)
 
     return {
         "transcription": transcription,
-        "evaluation": feedback
+        "gpt_score": gpt_result.get("score"),
+        "claude_score": claude_result.get("score"),
+        "final_score": final_score,
+        "gpt_feedback": gpt_result.get("feedback"),
+        "claude_feedback": claude_result.get("feedback"),
+        "combined_feedback": feedback_combined.strip()
     }
+
+
+def sanitize_feedback(feedback: str):
+    if not isinstance(feedback, str):
+        return feedback
+
+   
+    feedback = re.sub(r"^\*\*Feedback:\*\*\s*\n*", "", feedback.strip())
+    return feedback.strip()
 
 
 def read_docx(file_path):
@@ -498,7 +727,23 @@ def read_docx(file_path):
     text = "\n".join([para.text for para in doc.paragraphs])
     return text
 
+# Ensemble Evaluation (replaces evaluate_answer)
+def evaluate_answer(question: str, answer: str) -> Dict:
+    gpt_eval = evaluate_with_chatgpt(question, answer)
+    claude_eval = evaluate_with_claude(question, answer)
 
+    gpt_score = gpt_eval.get("score", 0)
+    claude_score = claude_eval.get("score", 0)
+
+    final_score = round((gpt_score + claude_score) / 2, 2)
+    feedback_combined = f"ChatGPT: {gpt_eval.get('feedback')} | Claude: {claude_eval.get('feedback')}"
+
+    return {
+        "final_score": final_score,
+        "chatgpt_score": gpt_score,
+        "claude_score": claude_score,
+        "feedback": feedback_combined
+    }
 # calling the main function
 def main():
     text = read_pdf_tables("/Users/kp/capstone/backend/My current resume.pdf")
