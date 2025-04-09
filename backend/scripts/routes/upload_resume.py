@@ -65,4 +65,8 @@ async def upload_resume(file: UploadFile = File(...), job_description: str = For
     session_state["questions"] = questions
     session_state["current_index"] = 0
 
-    return {"total_questions": len(questions)}
+    return {
+        "message": "Questions generated successfully",
+        "total_questions": len(questions),
+        "questions": questions
+    }
