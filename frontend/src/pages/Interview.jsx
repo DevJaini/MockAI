@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Section from "../components/Section";
-// import AudioRecorder from "../components/AudioRecorder";
 
 const Interview = () => {
   const navigate = useNavigate();
@@ -101,16 +100,6 @@ const Interview = () => {
     }
   }, [isInterviewStarted, timer, location]);
 
-  // // ⏲ Interview timer
-  // useEffect(() => {
-  //   let interval;
-  //   if (timer > 0) {
-  //     interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-  //   }
-  //   return () => clearInterval(interval);
-  // }, [timer]);
-
-  // 🚀 Fetch next question from backend
   const fetchNextQuestion = async () => {
     try {
       setIsLoadingQuestion(true);
@@ -140,10 +129,11 @@ const Interview = () => {
   // ▶️ Start interview
   const handleStartInterview = async () => {
     setIsInterviewStarted(true);
+
+    // setTimer(600); // 10 mins
+    setQuestionIndex(1);
     localStorage.setItem("interview-started", "true");
     localStorage.setItem("interview-question-index", questionIndex);
-    // setTimer(600); // 10 mins
-    setQuestionIndex(0);
     await fetchNextQuestion(); // play question 1
   };
 

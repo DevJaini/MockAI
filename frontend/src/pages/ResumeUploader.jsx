@@ -140,8 +140,16 @@ const ResumeUploader = () => {
                 Total interview time is <strong>30 minutes</strong>.
               </li>
               <li>
-                Click <strong>“Next Question”</strong> to proceed after
-                answering each question.
+                After each question is spoken, click{" "}
+                <strong>"Start Recording"</strong> to record your answer.
+              </li>
+              <li>
+                Click <strong>"Stop Recording"</strong> to stop and
+                automatically submit your response.
+              </li>
+              <li>
+                You can click <strong>"Next Question"</strong> after recording
+                each answer to proceed.
               </li>
               <li>All answers will be recorded for analysis.</li>
               <li>
@@ -156,6 +164,10 @@ const ResumeUploader = () => {
               </li>
             </ul>
 
+            <p className="mt-6 font-bold text-red-800">
+              ⚠️ It is mandatory to record an answer for each question.
+              Unrecorded responses will not be evaluated.
+            </p>
             <p className="mt-8 text-sm text-gray-600">
               Don’t worry — this is for practice and growth. Just do your best!
               😊
