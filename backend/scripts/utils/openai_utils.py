@@ -7,7 +7,7 @@ import re
 
 load_dotenv()
 
-client_openai = openai.Client(api_key=os.getenv("OPEN_API_KEY"))
+client_openai = openai.Client(api_key=os.getenv("OPENAPI_KEY"))
 client_claude = Anthropic(api_key=os.getenv("CLAUDE_API_KEY"))
 
 

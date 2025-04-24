@@ -12,7 +12,8 @@ face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=1)
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 600
 
-LOG_PATH = "face_confidence_log.json"
+# Store logs in the same directory as the script
+LOG_PATH = os.path.join(os.path.dirname(__file__), "face_confidence_log.json")
 
 # Decode base64 image from frontend
 async def decode_image(img_string):
@@ -28,6 +29,7 @@ async def decode_image(img_string):
 def append_face_confidence(conf):
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     entry = {"timestamp": timestamp, "confidence": conf}
+    print(f"Logging confidence entry: {entry}")
 
     try:
         if not os.path.exists(LOG_PATH):
@@ -35,12 +37,17 @@ def append_face_confidence(conf):
                 json.dump([entry], f, indent=2)
         else:
             with open(LOG_PATH, "r+") as f:
-                data = json.load(f)
+                try:
+                    data = json.load(f)
+                except json.JSONDecodeError:
+                    print("⚠️ Log file was empty or corrupted. Resetting.")
+                    data = []
+
                 data.append(entry)
                 f.seek(0)
                 json.dump(data, f, indent=2)
     except Exception as e:
-        print(f"Error logging face confidence: {e}")
+        print(f"❌ Error logging face confidence: {e}")
 
 @router.websocket("/face-confidence")
 async def detect_face_confidence(websocket: WebSocket):
@@ -54,10 +61,12 @@ async def detect_face_confidence(websocket: WebSocket):
             data = await websocket.receive_json()
 
             if "image" not in data:
+                print("⚠️ No image key in received data.")
                 continue
 
             frame = await decode_image(data["image"])
             if frame is None:
+                print("⚠️ Frame decoding failed.")
                 continue
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
