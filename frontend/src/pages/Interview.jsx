@@ -256,12 +256,13 @@ const Interview = () => {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const webcamCanvasRef = useRef(null);
-
-  const [isCameraOn, setIsCameraOn] = useState(false);
   const [timer, setTimer] = useState(() => {
     const saved = localStorage.getItem("interview-timer");
-    return saved ? parseInt(saved, 10) : 1800;
+    return saved ? parseInt(saved, 10) : 8 * 4 * 60; // fallback 8 questions = 32 mins
   });
+
+  const [isCameraOn, setIsCameraOn] = useState(false);
+
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [audioUrl, setAudioUrl] = useState(null);
   const [isInterviewStarted, setIsInterviewStarted] = useState(
@@ -276,7 +277,7 @@ const Interview = () => {
     const saved = localStorage.getItem("interview-attempted");
     return saved ? parseInt(saved, 10) : 0;
   });
-  const [totalQuestions, setTotalQuestions] = useState(8);
+  const [totalQuestions, setTotalQuestions] = useState(2);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -327,6 +328,13 @@ const Interview = () => {
     }
     setIsCameraOn(false);
   };
+
+  useEffect(() => {
+    const savedCount = localStorage.getItem("interview-question-count");
+    if (savedCount) {
+      setTotalQuestions(parseInt(savedCount, 10));
+    }
+  }, []);
 
   useEffect(() => {
     if (isInterviewStarted && timer > 0) {
@@ -397,7 +405,7 @@ const Interview = () => {
   const handleGenerateResult = (timeout = false) => {
     stopCamera();
     localStorage.clear();
-    if (timeout) alert("⏰ 30 minutes is over. Showing evaluation so far.");
+    if (timeout) alert("⏰ Time is over. Showing evaluation so far.");
     navigate("/results");
   };
 
@@ -542,7 +550,8 @@ const Interview = () => {
               {isInterviewStarted ? (
                 <>
                   <div>
-                    Time Remaining: {Math.floor(timer / 60)}:{timer % 60}
+                    Time Remaining: {Math.floor(timer / 60)}:
+                    {String(timer % 60).padStart(2, "0")}
                   </div>
                   <div className="text-white mt-4 mb-2">
                     {isLoadingQuestion ? (

@@ -13,7 +13,7 @@ const ResumeUploader = () => {
   const [isUploaded, setIsUploaded] = useState(false); // Track upload status
   const [numQuestions, setNumQuestions] = useState(); // default is 2
 
-  const totalTime = numQuestions * 4;
+  // const totalTime = numQuestions * 4;
 
   const handleResumeChange = (e) => {
     setResume(e.target.files[0]);
@@ -29,6 +29,9 @@ const ResumeUploader = () => {
 
     setIsAnalyzing(true);
     setIsUploaded(false);
+
+    localStorage.setItem("interview-question-count", numQuestions);
+    localStorage.setItem("interview-timer", numQuestions * 4 * 60); // 4 min per question
 
     const formData = new FormData();
     formData.append("file", resume);
