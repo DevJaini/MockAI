@@ -51,7 +51,11 @@ def extract_text_from_docx(file_path):
     return "\n".join([para.text for para in doc.paragraphs])
 
 @router.post("/upload-resume")
-async def upload_resume(file: UploadFile = File(...), job_description: str = Form(...)):
+async def upload_resume(
+    file: UploadFile = File(...), 
+    job_description: str = Form(...), 
+    num_questions: int = Form(2)):
+    
     reset_interview_logs()
     print("🔁 API Call: /upload-resume")
     print(f"📄 Filename: {file.filename}")
@@ -79,7 +83,7 @@ async def upload_resume(file: UploadFile = File(...), job_description: str = For
     print("🔑 Keywords:", keywords)
 
     print("🤖 Generating interview questions using OpenAI...")
-    questions = generate_questions(text, job_description, keywords)
+    questions = generate_questions(text, job_description, keywords, num_questions=num_questions)
 
     print("✅ Questions Generated:", questions)
     for i, q in enumerate(questions, 1):

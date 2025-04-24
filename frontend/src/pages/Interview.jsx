@@ -139,7 +139,7 @@
 //         <div className="flex flex-col items-center">
 //           {/* Video Feed */}
 //           <div
-//             className="flex flex-col items-center justify-center text-white text-xl rounded-lg shadow-lg mb-2 
+//             className="flex flex-col items-center justify-center text-white text-xl rounded-lg shadow-lg mb-2
 //              w-full max-w-screen-lg h-auto md:h-[500px] lg:h-[600px] xl:h-[700px]"
 //             style={{ height: "850px", width: "1800px", objectFit: "cover" }}
 //           >
@@ -341,12 +341,11 @@ const Interview = () => {
     } else if (timer === 0) {
       handleGenerateResult(true);
     }
-
+  });
   useEffect(() => {
     let interval;
     if (timer > 0) {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-
     }
   }, [isInterviewStarted, timer, location]);
 
@@ -357,7 +356,6 @@ const Interview = () => {
       const data = await res.json();
 
       if (data.audio_url) {
-
         setCurrentQuestion(data.question_text);
 
         setAudioUrl(data.audio_url);
@@ -385,7 +383,6 @@ const Interview = () => {
     localStorage.setItem("interview-started", "true");
     localStorage.setItem("interview-question-index", questionIndex);
     await fetchNextQuestion(); // play question 1
-
   };
 
   const handleNextQuestion = async () => {
@@ -455,7 +452,8 @@ const Interview = () => {
     const connectWebSocket = () => {
       ws = new WebSocket("ws://127.0.0.1:8000/face-confidence");
 
-      ws.onopen = () => console.log("✅ Connected to face-confidence WebSocket");
+      ws.onopen = () =>
+        console.log("✅ Connected to face-confidence WebSocket");
 
       ws.onmessage = (event) => {
         try {
@@ -517,7 +515,9 @@ const Interview = () => {
               ref={videoRef}
               autoPlay
               playsInline
-              className={`w-full rounded-lg shadow-lg ${!isCameraOn ? "hidden" : ""}`}
+              className={`w-full rounded-lg shadow-lg ${
+                !isCameraOn ? "hidden" : ""
+              }`}
               style={{
                 height: "100%",
                 objectFit: "contain",
@@ -533,7 +533,6 @@ const Interview = () => {
             )}
           </div>
 
-
           <div className="text-white mt-2 mb-4 text-lg">
             Face Confidence: {faceConfidence.toFixed(2)}%
           </div>
@@ -542,7 +541,9 @@ const Interview = () => {
             <div className="text-xl text-white mb-2">
               {isInterviewStarted ? (
                 <>
-                  <div>Time Remaining: {Math.floor(timer / 60)}:{timer % 60}</div>
+                  <div>
+                    Time Remaining: {Math.floor(timer / 60)}:{timer % 60}
+                  </div>
                   <div className="text-white mt-4 mb-2">
                     {isLoadingQuestion ? (
                       "Loading question..."

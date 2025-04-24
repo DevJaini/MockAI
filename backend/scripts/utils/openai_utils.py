@@ -11,16 +11,15 @@ client_openai = openai.Client(api_key=os.getenv("OPEN_API_KEY"))
 client_claude = Anthropic(api_key=os.getenv("CLAUDE_API_KEY"))
 
 
-def generate_questions(resume, jd, keywords):
+def generate_questions(resume, jd, keywords, num_questions=2):
     try:
         prompt = f"""
-        You are an expert job interviewer AI. Based on this resume and job description, and these important keywords: {keywords}, generate 8 technical and behavioral interview questions from medium to advanced level.
+        You are an expert job interviewer AI. Based on this resume and job description, and these important keywords: {keywords}, generate {num_questions} technical and behavioral interview questions from medium to advanced level.
 
         Format:
         1. [Question]
         2. [Question]
         ...
-        8. [Question]
 
         Resume: {resume}
         Job Description: {jd}
