@@ -350,12 +350,6 @@ const Interview = () => {
       handleGenerateResult(true);
     }
   });
-  useEffect(() => {
-    let interval;
-    if (timer > 0) {
-      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    }
-  }, [isInterviewStarted, timer, location]);
 
   const fetchNextQuestion = async () => {
     try {
