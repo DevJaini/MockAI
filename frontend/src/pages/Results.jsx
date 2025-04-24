@@ -19,6 +19,7 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+import { Rings } from "../components/design/Hero"; // adjust path if needed
 
 const Results = () => {
   const [report, setReport] = useState(null);
@@ -38,9 +39,14 @@ const Results = () => {
   }, []);
 
   if (!report)
-    return <div className="text-white p-8">Loading evaluation...</div>;
-  if (report.message)
-    return <div className="text-white p-8">{report.message}</div>;
+    return (
+      <Section className="min-h-screen flex flex-col items-center justify-center text-white p-8 text-center">
+        <Rings />
+        <p className="mt-4 text-lg font-semibold">
+          Analyzing your responses, please wait...
+        </p>
+      </Section>
+    );
 
   const summary = report.summary;
   const evaluations = report.evaluations;

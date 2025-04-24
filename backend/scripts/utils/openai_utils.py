@@ -135,6 +135,7 @@ def summarize_feedback_with_gpt(gpt_feedbacks, claude_feedbacks):
     {json.dumps(claude_feedbacks, indent=2)}
 
     Now please summarize the candidate's overall performance, key strengths, and improvement areas based on both models. Output should be 1 paragraph of final overall feedback.
+    Dont mention AI name in response.
     """
 
     try:

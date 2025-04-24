@@ -69,7 +69,6 @@ const Interview = () => {
     }
   };
 
-  // 🛑 Stop camera
   const stopCamera = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
@@ -233,7 +232,7 @@ const Interview = () => {
           </div>
 
           {/* Interview Panel */}
-          <div className="flex flex-col items-center w-full max-w-lg">
+          <div>
             <div className="text-xl text-white mb-2">
               {isInterviewStarted ? (
                 <>
@@ -303,7 +302,7 @@ const Interview = () => {
                       onClick={handleNextQuestion}
                       className="px-6 py-3 bg-purple-500 text-white font-bold rounded-lg shadow-md hover:bg-purple-600 transition"
                     >
-                      Next Question
+                      Question
                     </button>
                   ) : (
                     <button
