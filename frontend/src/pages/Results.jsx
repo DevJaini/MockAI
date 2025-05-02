@@ -19,6 +19,7 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+import { Rings } from "../components/design/Hero"; // adjust path if needed
 
 const Results = () => {
   const [report, setReport] = useState(null);
@@ -38,96 +39,130 @@ const Results = () => {
   }, []);
 
   if (!report)
-    return <div className="text-white p-8">Loading evaluation...</div>;
-  if (report.message)
-    return <div className="text-white p-8">{report.message}</div>;
+    return (
+      <Section className="min-h-screen flex flex-col items-center justify-center text-white p-8 text-center">
+        <Rings />
+        <p className="mt-4 text-lg font-semibold">
+          Analyzing your responses, please wait...
+        </p>
+      </Section>
+    );
 
-  const feedback = report.feedback;
+  const summary = report.summary;
+  const evaluations = report.evaluations;
+  const feedback = report.overall_feedback;
+
   const data = {
-    labels: [
-      "Clarity",
-      "Technical",
-      "Structure",
-      "Pronunciation",
-      "Face Confidence",
-    ],
+    labels: ["Clarity", "Technical", "Structure", "Face Confidence"],
     datasets: [
       {
-        label: "Score",
+        label: "Average Score",
         data: [
-          feedback?.clarity_score || 0,
-          feedback?.technical_score || 0,
-          feedback?.structure_score || 0,
-          feedback?.pronunciation_score || 0,
-          report.face_confidence || 0,
+          summary?.average_clarity_score || 0,
+          summary?.average_technical_score || 0,
+          summary?.average_structure_score || 0,
+          summary?.average_face_confidence || 0,
         ],
-        backgroundColor: [
-          "#4caf50",
-          "#2196f3",
-          "#ff9800",
-          "#9c27b0",
-          "#e91e63",
-        ],
+        backgroundColor: ["#4caf50", "#2196f3", "#ff9800", "#e91e63"],
       },
     ],
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: true,
+    aspectRatio: 5.5,
     scales: {
       y: {
         beginAtZero: true,
         max: 10,
-        ticks: { stepSize: 1, color: "white" },
+        ticks: { stepSize: 1, color: "white", font: { size: 20 } },
       },
       x: {
-        ticks: { color: "white" },
+        ticks: { color: "white", font: { size: 16 } },
       },
     },
     plugins: {
-      legend: { labels: { color: "white" } },
+      legend: { labels: { color: "white", font: { size: 20 } } },
       title: {
         display: true,
         text: "Interview Evaluation Scores",
         color: "white",
-        font: { size: 20 },
+        font: { size: 25 },
+      },
+      tooltip: {
+        enabled: true,
+        titleFont: { size: 14 },
+        bodyFont: { size: 14 },
+      },
+      datalabels: {
+        anchor: "end",
+        align: "start",
+        color: "white",
+        font: {
+          weight: "bold",
+          size: 14,
+        },
+        formatter: (value) => `Total: ${value}`,
       },
     },
   };
 
   return (
-    <div className="mt-6 bg-white bg-opacity-10 rounded-lg p-6 shadow-lg">
-      <h3 className="text-2xl font-semibold mb-4">Your Evaluation</h3>
+    <Section className="min-h-screen p-8 text-white">
+      <h2 className="text-4xl font-extrabold mb-8 text-center">
+        Interview Results
+      </h2>
 
-      <p className="text-lg mb-2">
-        <strong>Q:</strong> {report.question}
-      </p>
-      <p className="text-md mb-2 italic">
-        <strong>Transcript:</strong> {report.transcription}
-      </p>
+      <div className="bg-white bg-opacity-10 rounded-lg p-6 shadow-lg">
+        <h3 className="text-2xl font-semibold mb-4">🧠 Overall AI Feedback</h3>
+        <p className="mb-6 text-lg">{feedback}</p>
 
-      <div className="mb-4">
-        <h4 className="text-xl font-semibold">🤖 AI Feedback:</h4>
-        <p>{report.feedback}</p>
-      </div>
-
-      {report.mispronounced_words?.length > 0 && (
-        <div className="mb-4">
-          <h4 className="text-xl font-semibold">❌ Mispronounced Words:</h4>
-          <ul className="list-disc list-inside text-red-400">
-            {report.mispronounced_words.map((word, idx) => (
-              <li key={idx}>
-                <span className="font-semibold">{word.word}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="mt-6">
         <Bar data={data} options={options} />
+
+        <div className="mt-8">
+          <h3 className="text-2xl font-semibold mb-4">
+            🗂 Detailed Evaluations
+          </h3>
+          {evaluations.map((evalItem, idx) => (
+            <div
+              key={idx}
+              className="mb-6 p-4 border border-gray-300 rounded-lg bg-white bg-opacity-5"
+            >
+              <p className="text-md mb-3">
+                <strong>Questions:</strong> {evalItem.question}
+              </p>
+              <p className="text-md mb-3">
+                <strong>Answer:</strong> {evalItem.transcription}
+              </p>
+              <div className="text-sm mb-2">
+                <p>Clarity Score: {evalItem.clarity_score}</p>
+                <p>Technical Score: {evalItem.technical_score}</p>
+                <p>Structure Score: {evalItem.structure_score}</p>
+                <p>Answer Score: {evalItem.answer_score}</p>
+                <p>Face Confidence: {evalItem.face_confidence}</p>
+              </div>
+              {evalItem.mispronounced_words?.length > 0 && (
+                <div className="mb-2">
+                  <p className="font-semibold text-red-300">
+                    ❌ Mispronounced Words:
+                  </p>
+                  <ul className="list-disc list-inside text-red-400">
+                    {evalItem.mispronounced_words.map((word, idx2) => (
+                      <li key={idx2}>{word}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="mt-2">
+                <p className="font-semibold text-green-300">Feedback:</p>
+                <p className="text-sm mb-2">{evalItem.feedback.gpt}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </Section>
   );
 };
 

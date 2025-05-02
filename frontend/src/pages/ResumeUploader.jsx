@@ -11,6 +11,9 @@ const ResumeUploader = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false); // Track upload status
+  const [numQuestions, setNumQuestions] = useState(); // default is 2
+
+  // const totalTime = numQuestions * 4;
 
   const handleResumeChange = (e) => {
     setResume(e.target.files[0]);
@@ -27,9 +30,13 @@ const ResumeUploader = () => {
     setIsAnalyzing(true);
     setIsUploaded(false);
 
+    localStorage.setItem("interview-question-count", numQuestions);
+    localStorage.setItem("interview-timer", numQuestions * 4 * 60); // 4 min per question
+
     const formData = new FormData();
     formData.append("file", resume);
     formData.append("job_description", jobDescription);
+    formData.append("num_questions", numQuestions);
 
     try {
       const response = await fetch("http://localhost:8000/upload-resume", {
@@ -111,6 +118,22 @@ const ResumeUploader = () => {
             />
           </div>
 
+          <div className="text-left">
+            <label className="block text-white font-semibold mb-1">
+              Number of Questions:
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={numQuestions}
+              onChange={(e) => setNumQuestions(parseInt(e.target.value))}
+              className="w-full p-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900"
+              placeholder="Enter how many questions you want (1-10)"
+              required
+            />
+          </div>
+
           <button
             type="submit"
             disabled={isAnalyzing}
@@ -134,14 +157,29 @@ const ResumeUploader = () => {
             </h3>
             <ul className="list-disc list-inside text-gray-800 space-y-3 text-lg">
               <li>
-                You will be asked <strong>8 interview questions</strong>.
+                You will be asked{" "}
+                <strong>
+                  {numQuestions} interview question{numQuestions > 1 ? "s" : ""}
+                </strong>
+                .
+              </li>
+
+              <li>
+                Total interview time is{" "}
+                <strong>{numQuestions * 4} minutes</strong>.
+              </li>
+
+              <li>
+                After each question is spoken, click{" "}
+                <strong>"Start Recording"</strong> to record your answer.
               </li>
               <li>
-                Total interview time is <strong>30 minutes</strong>.
+                Click <strong>"Stop Recording"</strong> to stop and
+                automatically submit your response.
               </li>
               <li>
-                Click <strong>“Next Question”</strong> to proceed after
-                answering each question.
+                You can click <strong>"Next Question"</strong> after recording
+                each answer to proceed.
               </li>
               <li>All answers will be recorded for analysis.</li>
               <li>
@@ -156,6 +194,10 @@ const ResumeUploader = () => {
               </li>
             </ul>
 
+            <p className="mt-6 font-bold text-red-800">
+              ⚠️ It is mandatory to record an answer for each question.
+              Unrecorded responses will not be evaluated.
+            </p>
             <p className="mt-8 text-sm text-gray-600">
               Don’t worry — this is for practice and growth. Just do your best!
               😊
