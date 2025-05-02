@@ -535,11 +535,11 @@ const Interview = () => {
             )}
           </div>
 
-          <div className="text-white mt-2 mb-4 text-lg">
+          {/* <div className="text-white mt-2 mb-4 text-lg">
             Face Confidence: {faceConfidence.toFixed(2)}%
-          </div>
+          </div> */}
 
-          <div className="flex flex-col items-center w-full max-w-lg">
+          <div className="flex flex-col items-center">
             <div className="text-xl text-white mb-2">
               {isInterviewStarted ? (
                 <>
@@ -603,14 +603,18 @@ const Interview = () => {
 
               {isCameraOn && isInterviewStarted && (
                 <>
-                  {questionIndex + 1 < totalQuestions ? (
-                    <button
-                      onClick={handleNextQuestion}
-                      className="px-6 py-3 bg-purple-500 text-white font-bold rounded-lg shadow-md hover:bg-purple-600 transition"
-                    >
-                      Question
-                    </button>
-                  ) : (
+                  {questionIndex + 1 < totalQuestions &&
+                    !isRecording &&
+                    audioUrl && (
+                      <button
+                        onClick={handleNextQuestion}
+                        className="px-6 py-3 bg-purple-500 text-white font-bold rounded-lg shadow-md hover:bg-purple-600 transition"
+                      >
+                        Next Question
+                      </button>
+                    )}
+
+                  {questionIndex + 1 >= totalQuestions && !isRecording && (
                     <button
                       onClick={() => handleGenerateResult(false)}
                       className="px-6 py-3 bg-yellow-500 text-white font-bold rounded-lg shadow-md hover:bg-yellow-600 transition"
