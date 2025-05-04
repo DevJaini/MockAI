@@ -26,7 +26,7 @@ jaxlib==0.4.38
 keras==3.8.0
 opt_einsum==3.4.0
 optree==0.14.0
-ml_dtypes==0.5.1
+ml_dtypes~=0.3.1
 libclang==18.1.1
 flatbuffers==24.3.25
 protobuf==4.25.5
