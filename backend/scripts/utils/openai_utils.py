@@ -7,7 +7,7 @@ import re
 
 load_dotenv()
 
-client_openai = openai.Client(api_key=os.getenv("OPENAPI_KEY"))
+client_openai = openai.Client(api_key=os.getenv("OPEN_API_KEY"))
 client_claude = Anthropic(api_key=os.getenv("CLAUDE_API_KEY"))
 
 
@@ -36,7 +36,7 @@ def generate_questions(resume, jd, keywords, num_questions=2):
         return [line.strip() for line in response.choices[0].message.content.split("\n") if line.strip()]
     
     except Exception as e:
-        print("❌ OpenAI Error:", e)
+        print("OpenAI Error:", e)
         raise e  # or raise HTTPException(...) from here
 
 
@@ -70,9 +70,6 @@ def evaluate_with_chatgpt(question: str, answer: str):
             ]
         )
 
-        print("📥 GPT response:", response)
-        print("📄 Raw:", response.choices[0].message.content)
-
         content = response.choices[0].message.content.strip()
 
         # ✅ Remove triple backticks if present
@@ -82,7 +79,7 @@ def evaluate_with_chatgpt(question: str, answer: str):
 
         return json.loads(content)
     except Exception as e:
-        print("❌ GPT Evaluation Error:", e)
+        print("GPT Evaluation Error:", e)
         return {"clarity": 0, "technical_depth": 0, "structure": 0, "feedback": str(e)}
 
 def evaluate_with_claude(question: str, answer: str):
@@ -118,7 +115,7 @@ def evaluate_with_claude(question: str, answer: str):
             
         return json.loads(output)
     except Exception as e:
-        print("❌ Claude Evaluation Error:", e)
+        print("Claude Evaluation Error:", e)
         return {"clarity": 0, "technical_depth": 0, "structure": 0, "feedback": str(e)}
     
 def summarize_feedback_with_gpt(gpt_feedbacks, claude_feedbacks):
@@ -149,6 +146,6 @@ def summarize_feedback_with_gpt(gpt_feedbacks, claude_feedbacks):
         return response.choices[0].message.content.strip()
 
     except Exception as e:
-        print("❌ GPT Summary Error:", e)
+        print("GPT Summary Error:", e)
         return "Unable to generate summary due to an error."
 

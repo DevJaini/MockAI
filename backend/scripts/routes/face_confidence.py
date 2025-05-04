@@ -40,19 +40,19 @@ def append_face_confidence(conf):
                 try:
                     data = json.load(f)
                 except json.JSONDecodeError:
-                    print("⚠️ Log file was empty or corrupted. Resetting.")
+                    print("Log file was empty or corrupted. Resetting.")
                     data = []
 
                 data.append(entry)
                 f.seek(0)
                 json.dump(data, f, indent=2)
     except Exception as e:
-        print(f"❌ Error logging face confidence: {e}")
+        print(f"Error logging face confidence: {e}")
 
 @router.websocket("/face-confidence")
 async def detect_face_confidence(websocket: WebSocket):
     await websocket.accept()
-    print("✅ WebSocket connected: face-confidence")
+    print("WebSocket connected: face-confidence")
 
     last_logged_time = time.time()
 
@@ -61,12 +61,12 @@ async def detect_face_confidence(websocket: WebSocket):
             data = await websocket.receive_json()
 
             if "image" not in data:
-                print("⚠️ No image key in received data.")
+                print("No image key in received data.")
                 continue
 
             frame = await decode_image(data["image"])
             if frame is None:
-                print("⚠️ Frame decoding failed.")
+                print("Frame decoding failed.")
                 continue
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -104,6 +104,6 @@ async def detect_face_confidence(websocket: WebSocket):
             await websocket.send_json({"face_confidence": face_confidence})
 
     except WebSocketDisconnect:
-        print("❌ WebSocket disconnected.")
+        print("WebSocket disconnected.")
     except Exception as e:
-        print(f"❌ WebSocket error: {e}")
+        print(f"WebSocket error: {e}")

@@ -9,19 +9,11 @@ router = APIRouter()
 
 @router.post("/submit-answer")
 async def evaluate_response(file: UploadFile = File(...), question: str = Form(...)):
-    print("🔁 /submit-answer endpoint hit")
-    print("📄 File received:", file.filename)
-    print("🧠 Question:", question)
 
     transcript, mispronounced_words = await transcribe_audio(file)
-    print("📝 Transcript:", transcript)
-    print("❌ Mispronounced:", mispronounced_words)
 
     gpt_result = evaluate_with_chatgpt(question, transcript)
     claude_result = evaluate_with_claude(question, transcript)
-
-    print("🤖 GPT Result:", gpt_result)
-    print("🤖 Claude Result:", claude_result)
 
     clarity = round((gpt_result["clarity"] + claude_result["clarity"]) / 2, 2)
     tech = round((gpt_result["technical_depth"] + claude_result["technical_depth"]) / 2, 2)
@@ -32,8 +24,6 @@ async def evaluate_response(file: UploadFile = File(...), question: str = Form(.
     face_conf = get_average_face_confidence()
 
     final_score = calculate_total_score(face_conf, answer_score, clarity, pronunciation_score)
-    print("📊 Scores - Clarity:", clarity, "| Tech:", tech, "| Structure:", structure)
-    print("🎯 Final Score:", final_score)
 
     output = {
         "question": question,
@@ -62,6 +52,6 @@ async def evaluate_response(file: UploadFile = File(...), question: str = Form(.
             f.seek(0)
             json.dump(data, f, indent=2)
 
-        print(f"✅ Evaluation log written to: {EVALUATION_LOG_PATH}")
+        print(f"Evaluation log written to: {EVALUATION_LOG_PATH}")
 
     return output
