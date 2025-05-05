@@ -1,72 +1,25 @@
-# Web framework
-fastapi
-uvicorn[standard]
-python-multipart
-starlette
-
-# AI/NLP/ML
-openai
-transformers
-torch
-tensorflow
-jax
-jaxlib
-onnxruntime
-sentencepiece
-tiktoken
-safetensors
-
-# Audio processing
-openai-whisper
-faster-whisper
-ctranslate2
-pydub
-audioread
-librosa
-gTTS
-soundfile
-sounddevice
-soxr
-cmudict
-
-# Computer vision
-mediapipe
+fastapi==0.115.2
+uvicorn==0.34.2
+python-dotenv
+openai==1.77.0
+anthropic
+mediapipe==0.10.21
 opencv-python
-opencv-contrib-python
-av
-
-# Document & PDF parsing
-pdfkit
-pdfminer.six
+pydub
+faster-whisper==1.1.1
+scipy
+gTTS
 pdfplumber
 python-docx
-pypdfium2
-
-# NLP & scoring
-textblob
-textstat
-vaderSentiment
-
-# Redis, WebSockets, async tools
-redis
-websockets
-httptools
-uvloop
-watchfiles
-
-# Utilities
-email_validator
-rich
-typer
-shellingham
-huggingface-hub
-jsonpointer
-importlib_resources
-humanfriendly
-coloredlogs
-pooch
-appdirs
-dnspython
-setuptools
-typing_extensions
-wheel
+pyttsx3
+pillow
+requests
+numpy
+tqdm
+scikit-learn
+transformers
+torch
+filelock
+pdfminer.six
+pdfkit
+starlette
