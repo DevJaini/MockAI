@@ -1,6 +1,5 @@
 import pdfplumber
 from docx import Document
-import pyttsx3
 import os
 import pathlib
 from dotenv import load_dotenv
@@ -47,7 +46,7 @@ mp_face_mesh = mp.solutions.face_mesh
 mp_drawing = mp.solutions.drawing_utils
 pose = mp_pose.Pose(model_complexity=0, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 face_mesh = mp_face_mesh.FaceMesh()
-tts_engine = pyttsx3.init()
+# tts_engine = pyttsx3.init()
 load_dotenv()
 
 app.add_middleware(
