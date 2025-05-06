@@ -16,7 +16,7 @@ import Results from "./pages/Results";
 import ForgotPassword from "./pages/ForgotPassword";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
-import Signup from "./pages/SignUp";
+import Signup from "./pages/Signup";
 // import Dashboard from "./pages/Dashboard";
 
 const Layout = () => {
