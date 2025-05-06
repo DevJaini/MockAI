@@ -1,8 +1,13 @@
 import re
-import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-nlp = spacy.load("en_core_web_sm")
+import spacy
+try:
+    nlp = spacy.load("en_core_web_sm")
+except:
+    import subprocess
+    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+    nlp = spacy.load("en_core_web_sm")
 
 def extract_keywords(text, top_n=25):
     # Clean up text
