@@ -1,690 +1,234 @@
 [
   {
-    "timestamp": "2025-04-22 15:59:31",
-    "confidence": 0
-  },
-  {
-    "timestamp": "2025-04-22 15:59:34",
+    "timestamp": "2025-05-04 15:16:57",
     "confidence": 93.125
   },
   {
-    "timestamp": "2025-04-22 15:59:37",
-    "confidence": 90.0
+    "timestamp": "2025-05-04 15:17:00",
+    "confidence": 92.8125
   },
   {
-    "timestamp": "2025-04-22 15:59:39",
-    "confidence": 89.0625
-  },
-  {
-    "timestamp": "2025-04-22 15:59:42",
-    "confidence": 89.375
-  },
-  {
-    "timestamp": "2025-04-22 15:59:45",
-    "confidence": 89.6875
-  },
-  {
-    "timestamp": "2025-04-22 15:59:48",
+    "timestamp": "2025-05-04 15:17:03",
     "confidence": 90.3125
   },
   {
-    "timestamp": "2025-04-22 15:59:51",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-22 15:59:53",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-22 15:59:56",
-    "confidence": 86.25
-  },
-  {
-    "timestamp": "2025-04-22 15:59:59",
-    "confidence": 89.6875
-  },
-  {
-    "timestamp": "2025-04-22 16:00:02",
-    "confidence": 90.625
-  },
-  {
-    "timestamp": "2025-04-22 16:00:05",
-    "confidence": 90.0
-  },
-  {
-    "timestamp": "2025-04-22 16:00:08",
-    "confidence": 93.4375
-  },
-  {
-    "timestamp": "2025-04-22 16:00:10",
-    "confidence": 93.125
-  },
-  {
-    "timestamp": "2025-04-22 16:00:12",
+    "timestamp": "2025-05-04 15:17:05",
     "confidence": 90.3125
   },
   {
-    "timestamp": "2025-04-22 16:00:15",
-    "confidence": 90.0
-  },
-  {
-    "timestamp": "2025-04-22 16:00:17",
-    "confidence": 90.0
-  },
-  {
-    "timestamp": "2025-04-22 16:00:19",
-    "confidence": 90.0
-  },
-  {
-    "timestamp": "2025-04-22 16:00:22",
-    "confidence": 89.6875
-  },
-  {
-    "timestamp": "2025-04-22 16:00:24",
-    "confidence": 89.6875
-  },
-  {
-    "timestamp": "2025-04-22 16:00:27",
-    "confidence": 89.6875
-  },
-  {
-    "timestamp": "2025-04-22 16:00:29",
-    "confidence": 90.625
-  },
-  {
-    "timestamp": "2025-04-23 18:58:41",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 18:58:43",
-    "confidence": 91.25
-  },
-  {
-    "timestamp": "2025-04-23 18:58:46",
-    "confidence": 0
-  },
-  {
-    "timestamp": "2025-04-23 18:58:49",
-    "confidence": 0
-  },
-  {
-    "timestamp": "2025-04-23 18:58:52",
-    "confidence": 99.375
-  },
-  {
-    "timestamp": "2025-04-23 18:58:54",
-    "confidence": 92.8125
-  },
-  {
-    "timestamp": "2025-04-23 18:58:57",
-    "confidence": 0
-  },
-  {
-    "timestamp": "2025-04-23 18:58:59",
-    "confidence": 94.375
-  },
-  {
-    "timestamp": "2025-04-23 18:59:01",
-    "confidence": 98.75
-  },
-  {
-    "timestamp": "2025-04-23 18:59:04",
+    "timestamp": "2025-05-04 15:17:07",
     "confidence": 99.6875
   },
   {
-    "timestamp": "2025-04-23 18:59:06",
-    "confidence": 98.4375
-  },
-  {
-    "timestamp": "2025-04-23 18:59:08",
-    "confidence": 99.6875
-  },
-  {
-    "timestamp": "2025-04-23 18:59:11",
-    "confidence": 100.0
-  },
-  {
-    "timestamp": "2025-04-23 19:11:39",
-    "confidence": 93.75
-  },
-  {
-    "timestamp": "2025-04-23 19:11:42",
-    "confidence": 96.5625
-  },
-  {
-    "timestamp": "2025-04-23 19:11:44",
-    "confidence": 94.6875
-  },
-  {
-    "timestamp": "2025-04-23 19:11:47",
-    "confidence": 93.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:11:49",
-    "confidence": 93.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:11:52",
-    "confidence": 92.8125
-  },
-  {
-    "timestamp": "2025-04-23 19:12:11",
-    "confidence": 93.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:12:13",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:14:30",
-    "confidence": 88.75
-  },
-  {
-    "timestamp": "2025-04-23 19:14:33",
-    "confidence": 93.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:14:36",
-    "confidence": 94.375
-  },
-  {
-    "timestamp": "2025-04-23 19:14:38",
-    "confidence": 93.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:14:41",
-    "confidence": 94.0625
-  },
-  {
-    "timestamp": "2025-04-23 19:14:44",
-    "confidence": 93.125
-  },
-  {
-    "timestamp": "2025-04-23 19:14:46",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:14:49",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:14:52",
-    "confidence": 93.125
-  },
-  {
-    "timestamp": "2025-04-23 19:14:55",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:14:57",
-    "confidence": 92.8125
-  },
-  {
-    "timestamp": "2025-04-23 19:15:00",
-    "confidence": 86.875
-  },
-  {
-    "timestamp": "2025-04-23 19:15:03",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:15:06",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:15:09",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:15:12",
-    "confidence": 93.125
-  },
-  {
-    "timestamp": "2025-04-23 19:15:14",
-    "confidence": 90.9375
-  },
-  {
-    "timestamp": "2025-04-23 19:15:17",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:15:19",
-    "confidence": 92.8125
-  },
-  {
-    "timestamp": "2025-04-23 19:15:21",
-    "confidence": 94.0625
-  },
-  {
-    "timestamp": "2025-04-23 19:15:24",
-    "confidence": 93.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:15:27",
-    "confidence": 93.75
-  },
-  {
-    "timestamp": "2025-04-23 19:15:29",
-    "confidence": 94.0625
-  },
-  {
-    "timestamp": "2025-04-23 19:15:32",
-    "confidence": 93.75
-  },
-  {
-    "timestamp": "2025-04-23 19:15:35",
-    "confidence": 95.0
-  },
-  {
-    "timestamp": "2025-04-23 19:15:37",
-    "confidence": 95.0
-  },
-  {
-    "timestamp": "2025-04-23 19:15:40",
-    "confidence": 94.6875
-  },
-  {
-    "timestamp": "2025-04-23 19:21:06",
-    "confidence": 92.8125
-  },
-  {
-    "timestamp": "2025-04-23 19:21:09",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:21:11",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:21:14",
-    "confidence": 93.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:21:16",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:21:19",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:21:22",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:21:25",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:21:27",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:21:30",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:21:32",
-    "confidence": 93.125
-  },
-  {
-    "timestamp": "2025-04-23 19:21:35",
-    "confidence": 0
-  },
-  {
-    "timestamp": "2025-04-23 19:21:37",
-    "confidence": 0
-  },
-  {
-    "timestamp": "2025-04-23 19:21:40",
-    "confidence": 93.75
-  },
-  {
-    "timestamp": "2025-04-23 19:21:42",
-    "confidence": 98.75
-  },
-  {
-    "timestamp": "2025-04-23 19:21:44",
-    "confidence": 98.75
-  },
-  {
-    "timestamp": "2025-04-23 19:21:47",
-    "confidence": 98.75
-  },
-  {
-    "timestamp": "2025-04-23 19:21:50",
-    "confidence": 98.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:21:53",
-    "confidence": 98.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:21:56",
-    "confidence": 98.125
-  },
-  {
-    "timestamp": "2025-04-23 19:21:59",
-    "confidence": 98.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:22:01",
-    "confidence": 98.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:22:04",
-    "confidence": 95.3125
-  },
-  {
-    "timestamp": "2025-04-23 19:22:07",
-    "confidence": 96.875
-  },
-  {
-    "timestamp": "2025-04-23 19:22:09",
-    "confidence": 96.5625
-  },
-  {
-    "timestamp": "2025-04-23 19:22:11",
-    "confidence": 96.25
-  },
-  {
-    "timestamp": "2025-04-23 19:22:14",
-    "confidence": 96.25
-  },
-  {
-    "timestamp": "2025-04-23 19:22:16",
-    "confidence": 96.5625
-  },
-  {
-    "timestamp": "2025-04-23 19:22:19",
-    "confidence": 94.6875
-  },
-  {
-    "timestamp": "2025-04-23 19:22:22",
-    "confidence": 95.625
-  },
-  {
-    "timestamp": "2025-04-23 19:22:24",
-    "confidence": 94.375
-  },
-  {
-    "timestamp": "2025-04-23 19:22:27",
-    "confidence": 94.0625
-  },
-  {
-    "timestamp": "2025-04-23 19:22:30",
-    "confidence": 95.0
-  },
-  {
-    "timestamp": "2025-04-23 19:22:33",
-    "confidence": 94.0625
-  },
-  {
-    "timestamp": "2025-04-23 19:39:15",
-    "confidence": 95.0
-  },
-  {
-    "timestamp": "2025-04-23 19:39:18",
-    "confidence": 93.4375
-  },
-  {
-    "timestamp": "2025-04-23 19:39:21",
-    "confidence": 93.75
-  },
-  {
-    "timestamp": "2025-04-23 19:39:24",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:39:27",
-    "confidence": 93.125
-  },
-  {
-    "timestamp": "2025-04-23 19:39:30",
-    "confidence": 92.8125
-  },
-  {
-    "timestamp": "2025-04-23 19:39:33",
-    "confidence": 92.8125
-  },
-  {
-    "timestamp": "2025-04-23 19:39:35",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:39:38",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:39:40",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:39:43",
-    "confidence": 92.8125
-  },
-  {
-    "timestamp": "2025-04-23 19:39:46",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:39:48",
-    "confidence": 90.9375
-  },
-  {
-    "timestamp": "2025-04-23 19:39:50",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:39:53",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:39:56",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:39:58",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:40:01",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:40:03",
-    "confidence": 91.5625
-  },
-  {
-    "timestamp": "2025-04-23 19:40:06",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:40:08",
-    "confidence": 92.8125
-  },
-  {
-    "timestamp": "2025-04-23 19:40:11",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:40:14",
-    "confidence": 91.25
-  },
-  {
-    "timestamp": "2025-04-23 19:40:17",
-    "confidence": 91.25
-  },
-  {
-    "timestamp": "2025-04-23 19:40:19",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:40:22",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:40:25",
-    "confidence": 93.75
-  },
-  {
-    "timestamp": "2025-04-23 19:40:27",
-    "confidence": 92.8125
-  },
-  {
-    "timestamp": "2025-04-23 19:40:30",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:40:32",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:40:35",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:40:38",
-    "confidence": 93.125
-  },
-  {
-    "timestamp": "2025-04-23 19:40:40",
-    "confidence": 92.5
-  },
-  {
-    "timestamp": "2025-04-23 19:40:42",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:40:47",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:40:50",
-    "confidence": 92.8125
-  },
-  {
-    "timestamp": "2025-04-23 19:40:52",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:41:16",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:41:19",
-    "confidence": 93.75
-  },
-  {
-    "timestamp": "2025-04-23 19:41:21",
-    "confidence": 89.6875
-  },
-  {
-    "timestamp": "2025-04-23 19:41:23",
+    "timestamp": "2025-05-04 15:17:10",
     "confidence": 89.0625
   },
   {
-    "timestamp": "2025-04-23 19:42:44",
+    "timestamp": "2025-05-04 15:17:13",
+    "confidence": 89.6875
+  },
+  {
+    "timestamp": "2025-05-04 15:17:15",
     "confidence": 0
   },
   {
-    "timestamp": "2025-04-23 19:42:47",
-    "confidence": 90.9375
+    "timestamp": "2025-05-04 15:17:18",
+    "confidence": 93.75
   },
   {
-    "timestamp": "2025-04-23 19:42:50",
-    "confidence": 90.9375
-  },
-  {
-    "timestamp": "2025-04-23 19:42:53",
-    "confidence": 91.25
-  },
-  {
-    "timestamp": "2025-04-23 19:42:56",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:43:00",
-    "confidence": 90.9375
-  },
-  {
-    "timestamp": "2025-04-23 19:43:02",
-    "confidence": 90.9375
-  },
-  {
-    "timestamp": "2025-04-23 19:43:04",
-    "confidence": 91.25
-  },
-  {
-    "timestamp": "2025-04-23 19:43:07",
-    "confidence": 92.1875
-  },
-  {
-    "timestamp": "2025-04-23 19:43:09",
-    "confidence": 91.5625
-  },
-  {
-    "timestamp": "2025-04-23 19:43:12",
-    "confidence": 91.5625
-  },
-  {
-    "timestamp": "2025-04-23 19:43:14",
-    "confidence": 0
-  },
-  {
-    "timestamp": "2025-04-23 19:43:17",
-    "confidence": 90.9375
-  },
-  {
-    "timestamp": "2025-04-23 19:43:19",
-    "confidence": 91.25
-  },
-  {
-    "timestamp": "2025-04-23 19:43:22",
-    "confidence": 91.875
-  },
-  {
-    "timestamp": "2025-04-23 19:49:43",
-    "confidence": 98.75
-  },
-  {
-    "timestamp": "2025-04-23 19:49:46",
+    "timestamp": "2025-05-04 15:17:21",
     "confidence": 97.8125
   },
   {
-    "timestamp": "2025-04-23 19:49:49",
+    "timestamp": "2025-05-04 15:17:24",
+    "confidence": 90.3125
+  },
+  {
+    "timestamp": "2025-05-04 15:17:27",
+    "confidence": 87.1875
+  },
+  {
+    "timestamp": "2025-05-04 15:17:30",
+    "confidence": 84.375
+  },
+  {
+    "timestamp": "2025-05-04 15:17:33",
+    "confidence": 98.125
+  },
+  {
+    "timestamp": "2025-05-04 15:17:35",
+    "confidence": 89.6875
+  },
+  {
+    "timestamp": "2025-05-04 15:17:37",
+    "confidence": 89.375
+  },
+  {
+    "timestamp": "2025-05-04 15:17:40",
+    "confidence": 89.375
+  },
+  {
+    "timestamp": "2025-05-04 15:17:42",
+    "confidence": 89.0625
+  },
+  {
+    "timestamp": "2025-05-04 15:17:45",
+    "confidence": 89.0625
+  },
+  {
+    "timestamp": "2025-05-04 15:17:48",
+    "confidence": 89.0625
+  },
+  {
+    "timestamp": "2025-05-04 15:17:50",
+    "confidence": 89.375
+  },
+  {
+    "timestamp": "2025-05-04 15:17:52",
+    "confidence": 80.0
+  },
+  {
+    "timestamp": "2025-05-04 15:17:54",
+    "confidence": 93.125
+  },
+  {
+    "timestamp": "2025-05-04 15:17:57",
+    "confidence": 88.4375
+  },
+  {
+    "timestamp": "2025-05-04 15:17:59",
+    "confidence": 87.5
+  },
+  {
+    "timestamp": "2025-05-04 15:18:02",
+    "confidence": 88.4375
+  },
+  {
+    "timestamp": "2025-05-04 15:18:05",
+    "confidence": 88.75
+  },
+  {
+    "timestamp": "2025-05-04 15:18:08",
+    "confidence": 88.75
+  },
+  {
+    "timestamp": "2025-05-04 15:18:11",
+    "confidence": 88.125
+  },
+  {
+    "timestamp": "2025-05-04 15:18:14",
+    "confidence": 0
+  },
+  {
+    "timestamp": "2025-05-04 15:18:17",
     "confidence": 98.75
   },
   {
-    "timestamp": "2025-04-23 19:49:52",
-    "confidence": 91.25
+    "timestamp": "2025-05-04 15:18:20",
+    "confidence": 97.5
   },
   {
-    "timestamp": "2025-04-23 19:49:54",
+    "timestamp": "2025-05-04 15:18:22",
+    "confidence": 98.75
+  },
+  {
+    "timestamp": "2025-05-04 15:18:25",
     "confidence": 99.0625
   },
   {
-    "timestamp": "2025-04-23 19:49:57",
-    "confidence": 100.0
+    "timestamp": "2025-05-04 15:18:28",
+    "confidence": 98.75
   },
   {
-    "timestamp": "2025-04-23 19:50:00",
-    "confidence": 99.375
+    "timestamp": "2025-05-04 15:18:31",
+    "confidence": 94.375
   },
   {
-    "timestamp": "2025-04-23 19:50:02",
-    "confidence": 99.6875
+    "timestamp": "2025-05-04 15:18:34",
+    "confidence": 95.3125
   },
   {
-    "timestamp": "2025-04-23 19:50:04",
+    "timestamp": "2025-05-04 15:18:37",
+    "confidence": 90.3125
+  },
+  {
+    "timestamp": "2025-05-04 15:18:39",
+    "confidence": 90.3125
+  },
+  {
+    "timestamp": "2025-05-04 15:18:42",
+    "confidence": 90.3125
+  },
+  {
+    "timestamp": "2025-05-04 15:18:45",
+    "confidence": 90.0
+  },
+  {
+    "timestamp": "2025-05-04 15:18:48",
+    "confidence": 90.3125
+  },
+  {
+    "timestamp": "2025-05-04 15:18:51",
+    "confidence": 90.9375
+  },
+  {
+    "timestamp": "2025-05-04 15:18:54",
+    "confidence": 90.3125
+  },
+  {
+    "timestamp": "2025-05-04 15:27:53",
+    "confidence": 92.5
+  },
+  {
+    "timestamp": "2025-05-04 15:27:56",
+    "confidence": 93.4375
+  },
+  {
+    "timestamp": "2025-05-04 15:27:59",
+    "confidence": 93.75
+  },
+  {
+    "timestamp": "2025-05-04 15:28:01",
+    "confidence": 94.0625
+  },
+  {
+    "timestamp": "2025-05-04 15:28:03",
+    "confidence": 92.5
+  },
+  {
+    "timestamp": "2025-05-04 15:28:06",
     "confidence": 0
   },
   {
-    "timestamp": "2025-04-23 19:50:07",
-    "confidence": 0
+    "timestamp": "2025-05-04 15:28:08",
+    "confidence": 91.875
   },
   {
-    "timestamp": "2025-04-23 19:50:10",
-    "confidence": 98.4375
+    "timestamp": "2025-05-04 15:28:11",
+    "confidence": 92.8125
+  },
+  {
+    "timestamp": "2025-05-04 15:28:13",
+    "confidence": 93.125
+  },
+  {
+    "timestamp": "2025-05-04 15:28:16",
+    "confidence": 94.0625
+  },
+  {
+    "timestamp": "2025-05-04 15:28:19",
+    "confidence": 93.75
+  },
+  {
+    "timestamp": "2025-05-04 15:28:22",
+    "confidence": 93.75
+  },
+  {
+    "timestamp": "2025-05-04 15:28:24",
+    "confidence": 93.75
+  },
+  {
+    "timestamp": "2025-05-04 15:28:27",
+    "confidence": 0
   }
 ]
