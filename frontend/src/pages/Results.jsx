@@ -27,7 +27,9 @@ const Results = () => {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const res = await fetch("http://localhost:8000/interview-report");
+        const res = await fetch(
+          "https://mockai-mqnl.onrender.com/interview-report"
+        );
         const data = await res.json();
         setReport(data);
       } catch (err) {

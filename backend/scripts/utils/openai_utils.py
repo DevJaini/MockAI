@@ -11,6 +11,8 @@ client_openai = openai.Client(api_key=os.getenv("OPEN_API_KEY"))
 client_claude = Anthropic(api_key=os.getenv("CLAUDE_API_KEY"))
 
 
+import re
+
 def generate_questions(resume, jd, keywords, num_questions=2):
     try:
         prompt = f"""
@@ -33,11 +35,22 @@ def generate_questions(resume, jd, keywords, num_questions=2):
             ]
         )
 
-        return [line.strip() for line in response.choices[0].message.content.split("\n") if line.strip()]
-    
+        raw_lines = [line.strip() for line in response.choices[0].message.content.split("\n") if line.strip()]
+
+        # Filter out formatting labels like "1. **Technical Question:**"
+        cleaned_questions = []
+        for line in raw_lines:
+            # Skip lines that are just labels or headings
+            if re.match(r"^\d+\.\s*\*\*.*\*\*:?$", line):  
+                continue
+            cleaned_questions.append(re.sub(r"^\d+\.\s*", "", line))  # remove "1. ", "2. ", etc.
+
+        return cleaned_questions
+
     except Exception as e:
         print("OpenAI Error:", e)
-        raise e  # or raise HTTPException(...) from here
+        raise e
+
 
 
 def evaluate_with_chatgpt(question: str, answer: str):

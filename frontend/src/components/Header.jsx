@@ -16,7 +16,6 @@ const Header = () => {
   useEffect(() => {
     // Simulating user authentication (Replace this with real auth logic)
     const storedUser = localStorage.getItem("user");
-    console.log("23", storedUser);
     if (storedUser) {
       setUser(JSON.parse(storedUser)); // Set user if logged in
     }

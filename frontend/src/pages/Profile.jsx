@@ -37,9 +37,6 @@ const Profile = () => {
       return;
     }
 
-    console.log("Old Password:", passwords.oldPassword);
-    console.log("New Password:", passwords.newPassword);
-
     // Reset passwords after submission (For now, just clear the fields)
     setPasswords({ oldPassword: "", newPassword: "", confirmPassword: "" });
     setShowModal(false);

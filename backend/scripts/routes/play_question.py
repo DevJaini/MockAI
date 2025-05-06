@@ -31,7 +31,7 @@ async def play_question():
     path = text_to_speech(question_text, filename)
 
     session_state["current_index"] += 1
-    BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+    BASE_URL = os.getenv("BASE_URL", "https://mockai-mqnl.onrender.com")
 
     return {
         "audio_url": f"{BASE_URL}/static/{filename}",

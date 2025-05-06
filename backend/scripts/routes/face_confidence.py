@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from PIL import Image
 import mediapipe as mp
+from main import FACE_LOG_PATH
 
 router = APIRouter()
 
@@ -11,9 +12,6 @@ mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=1)
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 600
-
-# Store logs in the same directory as the script
-LOG_PATH = os.path.join(os.path.dirname(__file__), "face_confidence_log.json")
 
 # Decode base64 image from frontend
 async def decode_image(img_string):
@@ -32,11 +30,11 @@ def append_face_confidence(conf):
     print(f"Logging confidence entry: {entry}")
 
     try:
-        if not os.path.exists(LOG_PATH):
-            with open(LOG_PATH, "w") as f:
+        if not os.path.exists(FACE_LOG_PATH):
+            with open(FACE_LOG_PATH, "w") as f:
                 json.dump([entry], f, indent=2)
         else:
-            with open(LOG_PATH, "r+") as f:
+            with open(FACE_LOG_PATH, "r+") as f:
                 try:
                     data = json.load(f)
                 except json.JSONDecodeError:

@@ -33,7 +33,7 @@ async def evaluate_response(file: UploadFile = File(...), question: str = Form(.
         "structure_score": structure,
         "answer_score": answer_score,
         "pronunciation_score": pronunciation_score,
-        "face_confidence": final_score,
+        "face_confidence": face_conf,
         "final_score": final_score,
         "mispronounced_words": mispronounced_words,
         "feedback": {

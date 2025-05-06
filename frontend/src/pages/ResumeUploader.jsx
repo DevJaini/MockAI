@@ -39,24 +39,27 @@ const ResumeUploader = () => {
     formData.append("num_questions", numQuestions);
 
     try {
-      const response = await fetch("http://localhost:8000/upload-resume", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://mockai-mqnl.onrender.com/upload-resume",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        console.error("❌ Backend error:", data);
+        console.error("Backend error:", data);
         alert(data.detail || "Something went wrong.");
         setIsAnalyzing(false);
         return;
       }
 
-      console.log("✅ Upload success:", data);
+      console.log("Upload success:", data);
       setIsUploaded(true); // Show "Start Interview" button
     } catch (error) {
-      console.error("❌ Upload failed:", error);
+      console.error("Upload failed:", error);
       alert("Server error. Please try again.");
       setIsAnalyzing(false);
     }
