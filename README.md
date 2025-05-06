@@ -66,7 +66,7 @@ MockAI is an AI-driven job interview simulator that customizes interview questio
      uvicorn main:app --reload
      ```
 
-   The application should now be running at `http://localhost:5173` for the frontend and `http://localhost:8000` for the backend.
+   The application should now be running at `https://mock-ai-three.vercel.app` for the frontend and ` https://mockai-mqnl.onrender.com` for the backend.
 
 ## User Manual
 
