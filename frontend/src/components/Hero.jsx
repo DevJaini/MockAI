@@ -39,7 +39,7 @@ const Hero = () => {
       <div className="container relative" ref={parallaxRef}>
         <div className="relative z-1 max-w-[62rem] mx-auto text-center mb-[3.875rem] md:mb-20 lg:mb-[4rem]">
           <h1 className="h1 mb-6">
-            Prepare, Practice, and Perform Your Interview with
+            Prepare, Practice, and Perform Your Interview with&nbsp;
             <span className="inline-block relative">
               MockAI
               <img
