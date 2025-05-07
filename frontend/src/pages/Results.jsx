@@ -10,7 +10,9 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { Rings } from "../components/design/Hero";
 
+// Register required chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -19,11 +21,11 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-import { Rings } from "../components/design/Hero"; // adjust path if needed
 
 const Results = () => {
   const [report, setReport] = useState(null);
 
+  // Fetch evaluation report from backend on mount
   useEffect(() => {
     const fetchReport = async () => {
       try {
@@ -40,6 +42,7 @@ const Results = () => {
     fetchReport();
   }, []);
 
+  // Display loader while report is being fetched
   if (!report)
     return (
       <Section className="min-h-screen flex flex-col items-center justify-center text-white p-8 text-center">
@@ -50,10 +53,9 @@ const Results = () => {
       </Section>
     );
 
-  const summary = report.summary;
-  const evaluations = report.evaluations;
-  const feedback = report.overall_feedback;
+  const { summary, evaluations, overall_feedback } = report;
 
+  // Data for bar chart visualization
   const data = {
     labels: ["Clarity", "Technical", "Structure", "Face Confidence"],
     datasets: [
@@ -70,6 +72,7 @@ const Results = () => {
     ],
   };
 
+  // Chart configuration options
   const options = {
     responsive: true,
     maintainAspectRatio: true,
@@ -97,16 +100,6 @@ const Results = () => {
         titleFont: { size: 14 },
         bodyFont: { size: 14 },
       },
-      datalabels: {
-        anchor: "end",
-        align: "start",
-        color: "white",
-        font: {
-          weight: "bold",
-          size: 14,
-        },
-        formatter: (value) => `Total: ${value}`,
-      },
     },
   };
 
@@ -117,22 +110,22 @@ const Results = () => {
       </h2>
 
       <div className="bg-white bg-opacity-10 rounded-lg p-6 shadow-lg">
-        <h3 className="text-2xl font-semibold mb-4">🧠 Overall AI Feedback</h3>
-        <p className="mb-6 text-lg">{feedback}</p>
+        <h3 className="text-2xl font-semibold mb-4">Overall AI Feedback</h3>
+        <p className="mb-6 text-lg">{overall_feedback}</p>
 
+        {/* Bar chart visualizing average scores */}
         <Bar data={data} options={options} />
 
+        {/* List of detailed evaluations */}
         <div className="mt-8">
-          <h3 className="text-2xl font-semibold mb-4">
-            🗂 Detailed Evaluations
-          </h3>
+          <h3 className="text-2xl font-semibold mb-4">Detailed Evaluations</h3>
           {evaluations.map((evalItem, idx) => (
             <div
               key={idx}
               className="mb-6 p-4 border border-gray-300 rounded-lg bg-white bg-opacity-5"
             >
               <p className="text-md mb-3">
-                <strong>Questions:</strong> {evalItem.question}
+                <strong>Question:</strong> {evalItem.question}
               </p>
               <p className="text-md mb-3">
                 <strong>Answer:</strong> {evalItem.transcription}
@@ -147,7 +140,7 @@ const Results = () => {
               {evalItem.mispronounced_words?.length > 0 && (
                 <div className="mb-2">
                   <p className="font-semibold text-red-300">
-                    ❌ Mispronounced Words:
+                    Mispronounced Words:
                   </p>
                   <ul className="list-disc list-inside text-red-400">
                     {evalItem.mispronounced_words.map((word, idx2) => (

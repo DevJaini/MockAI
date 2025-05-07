@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const navigate = useNavigate();
+
+  // Initial user state from localStorage or redirect
   const [user, setUser] = useState({ username: "", email: "" });
   const [showModal, setShowModal] = useState(false);
   const [passwords, setPasswords] = useState({
@@ -14,30 +16,30 @@ const Profile = () => {
     confirmPassword: "",
   });
 
+  // Load user data or redirect if not authenticated
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
       setUser(storedUser);
     } else {
-      navigate("/login"); // Redirect to login if user is not authenticated
+      navigate("/login");
     }
   }, [navigate]);
 
+  // Handle profile update
   const handleUpdateProfile = (e) => {
     e.preventDefault();
     localStorage.setItem("user", JSON.stringify(user));
     alert("Profile updated successfully!");
   };
 
+  // Handle password reset logic (temporary UI feedback)
   const handleResetPassword = (e) => {
     e.preventDefault();
-
     if (passwords.newPassword !== passwords.confirmPassword) {
       alert("New password and confirm password do not match!");
       return;
     }
-
-    // Reset passwords after submission (For now, just clear the fields)
     setPasswords({ oldPassword: "", newPassword: "", confirmPassword: "" });
     setShowModal(false);
     alert("Password updated successfully!");
@@ -45,12 +47,9 @@ const Profile = () => {
 
   return (
     <Section className="relative min-h-screen flex flex-col items-center justify-center p-6 text-center">
-      {/* Background */}
+      {/* Blurred background image */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute -top-[50%] left-1/2 w-[200%] -translate-x-1/2 
-                        md:-top-[40%] md:w-[130%] lg:-top-[80%]"
-        >
+        <div className="absolute -top-[50%] left-1/2 w-[200%] -translate-x-1/2 md:-top-[40%] md:w-[130%] lg:-top-[80%]">
           <img
             src={heroBackground}
             alt="hero background"
@@ -61,10 +60,11 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Profile content */}
       <div className="relative z-10 bg-white bg-opacity-10 backdrop-blur-lg shadow-xl rounded-xl p-8 max-w-lg w-full">
         <h2 className="text-4xl font-extrabold text-white mb-6">Profile</h2>
 
+        {/* Profile Update Form */}
         <form onSubmit={handleUpdateProfile} className="flex flex-col gap-4">
           <div className="text-left">
             <label className="block text-white font-semibold mb-1">
@@ -100,6 +100,7 @@ const Profile = () => {
           </button>
         </form>
 
+        {/* Reset Password Button */}
         <button
           onClick={() => setShowModal(true)}
           className="w-full mt-4 px-6 py-3 border border-white text-white font-bold rounded-lg shadow-md hover:bg-purple-600 transition transform mt-10"
@@ -132,7 +133,6 @@ const Profile = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900"
                 required
               />
-
               <input
                 type="password"
                 placeholder="New Password"
@@ -143,7 +143,6 @@ const Profile = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900"
                 required
               />
-
               <input
                 type="password"
                 placeholder="Confirm New Password"
@@ -167,6 +166,7 @@ const Profile = () => {
                 </button>
                 <button
                   onClick={() => setShowModal(false)}
+                  type="button"
                   className="px-6 py-2 bg-purple-500 text-white font-bold rounded-lg shadow-md hover:bg-purple-600 transition transform hover:scale-105"
                 >
                   Cancel

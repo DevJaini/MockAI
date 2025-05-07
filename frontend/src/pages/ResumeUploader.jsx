@@ -10,15 +10,15 @@ const ResumeUploader = () => {
   const [resume, setResume] = useState(null);
   const [jobDescription, setJobDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isUploaded, setIsUploaded] = useState(false); // Track upload status
-  const [numQuestions, setNumQuestions] = useState(); // default is 2
+  const [isUploaded, setIsUploaded] = useState(false);
+  const [numQuestions, setNumQuestions] = useState();
 
-  // const totalTime = numQuestions * 4;
-
+  // Handle resume file selection
   const handleResumeChange = (e) => {
     setResume(e.target.files[0]);
   };
 
+  // Submit resume and job description for analysis
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -31,7 +31,7 @@ const ResumeUploader = () => {
     setIsUploaded(false);
 
     localStorage.setItem("interview-question-count", numQuestions);
-    localStorage.setItem("interview-timer", numQuestions * 4 * 60); // 4 min per question
+    localStorage.setItem("interview-timer", numQuestions * 4 * 60);
 
     const formData = new FormData();
     formData.append("file", resume);
@@ -57,7 +57,7 @@ const ResumeUploader = () => {
       }
 
       console.log("Upload success:", data);
-      setIsUploaded(true); // Show "Start Interview" button
+      setIsUploaded(true);
     } catch (error) {
       console.error("Upload failed:", error);
       alert("Server error. Please try again.");
@@ -65,18 +65,16 @@ const ResumeUploader = () => {
     }
   };
 
+  // Navigate to interview page
   const handleStartInterview = () => {
     navigate("/interview");
   };
 
   return (
     <Section className="relative min-h-screen flex flex-col items-center justify-center p-6 text-center">
-      {/* Background */}
+      {/* Background image */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute -top-[50%] left-1/2 w-[200%] -translate-x-1/2 
-                        md:-top-[40%] md:w-[130%] lg:-top-[80%]"
-        >
+        <div className="absolute -top-[50%] left-1/2 w-[200%] -translate-x-1/2 md:-top-[40%] md:w-[130%] lg:-top-[80%]">
           <img
             src={heroBackground}
             alt="hero background"
@@ -87,7 +85,7 @@ const ResumeUploader = () => {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Upload form */}
       <div className="relative z-10 bg-white bg-opacity-10 backdrop-blur-lg shadow-xl rounded-xl p-8 max-w-lg w-full">
         <h2 className="text-4xl font-extrabold text-white mb-6">
           Upload Your Resume
@@ -151,7 +149,7 @@ const ResumeUploader = () => {
         </form>
       </div>
 
-      {/* Instruction Modal */}
+      {/* Instruction Modal shown after upload */}
       {(isAnalyzing || isUploaded) && (
         <div className="fixed inset-0 bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-xl p-10 w-[90%] max-w-xl text-left animate-fadeIn">
@@ -166,12 +164,10 @@ const ResumeUploader = () => {
                 </strong>
                 .
               </li>
-
               <li>
                 Total interview time is{" "}
                 <strong>{numQuestions * 4} minutes</strong>.
               </li>
-
               <li>
                 After each question is spoken, click{" "}
                 <strong>"Start Recording"</strong> to record your answer.
@@ -181,8 +177,8 @@ const ResumeUploader = () => {
                 automatically submit your response.
               </li>
               <li>
-                You can click <strong>"Next Question"</strong> after recording
-                each answer to proceed.
+                Click <strong>"Next Question"</strong> after recording each
+                answer to proceed.
               </li>
               <li>All answers will be recorded for analysis.</li>
               <li>
@@ -196,7 +192,6 @@ const ResumeUploader = () => {
                 Make sure your camera and microphone are working properly.
               </li>
             </ul>
-
             <p className="mt-6 font-bold text-red-800">
               ⚠️ It is mandatory to record an answer for each question.
               Unrecorded responses will not be evaluated.

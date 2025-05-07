@@ -6,29 +6,37 @@ import { Rings } from "../components/design/Hero";
 
 const Login = () => {
   const navigate = useNavigate();
+
+  // Manage login form state
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
+  // Handle input changes for controlled form
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle login form submission
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Simulated login logic (replace with real authentication API)
     console.log("User logged in:", formData);
+
     const userData = {
       username: "Jaini",
       email: "jainishah1641@gmail.com",
     };
+
     localStorage.setItem("user", JSON.stringify(userData));
 
-    navigate("/"); // Redirect after login
-    window.location.reload(); // Reload to update header UI
+    navigate("/"); // Redirect to homepage
+    window.location.reload(); // Refresh to apply logged-in UI changes
   };
 
   return (
     <Section className="relative min-h-screen flex flex-col items-center justify-center p-6 text-center">
-      {/* Background */}
+      {/* Background image with blur effect */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <img
           src={heroBackground}
@@ -39,15 +47,17 @@ const Login = () => {
         />
       </div>
 
-      {/* Content */}
+      {/* Login box */}
       <div className="relative z-10 bg-white bg-opacity-10 backdrop-blur-lg shadow-xl rounded-xl p-8 max-w-lg w-full">
         <h2 className="text-4xl font-extrabold text-white mb-6">Log In</h2>
         <p className="text-lg opacity-70 mb-6">
           Welcome back! Continue sharpening your interview skills with AI-driven
           insights
         </p>
+
         {error && <p className="text-red-500 text-center">{error}</p>}
 
+        {/* Login Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="email"
@@ -58,6 +68,7 @@ const Login = () => {
             required
             className="w-full p-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900"
           />
+
           <input
             type="password"
             name="password"
@@ -76,6 +87,7 @@ const Login = () => {
           </button>
         </form>
 
+        {/* Navigation Links */}
         <p className="text-white mt-8">
           Don't have an account?{" "}
           <button
@@ -95,6 +107,8 @@ const Login = () => {
           </button>
         </p>
       </div>
+
+      {/* Background element */}
       <Rings />
     </Section>
   );

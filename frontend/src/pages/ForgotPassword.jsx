@@ -7,42 +7,50 @@ import { Rings } from "../components/design/Hero";
 const ForgotPassword = () => {
   const navigate = useNavigate();
 
-  const [step, setStep] = useState(1); // To track current step
+  // State variables for each step
+  const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New password
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
+  /**
+   * Step 1: Send OTP to entered email
+   */
   const handleEmailSubmit = (e) => {
     e.preventDefault();
-    // Assuming OTP is sent to the email
     console.log("OTP sent to:", email);
-    setStep(2); // Go to OTP step
+    setStep(2);
   };
 
+  /**
+   * Step 2: Verify OTP
+   */
   const handleOtpSubmit = (e) => {
     e.preventDefault();
-    // You can validate the OTP here
     console.log("OTP entered:", otp);
-    setStep(3); // Go to reset password step
+    setStep(3);
   };
 
+  /**
+   * Step 3: Submit new password
+   */
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
+
     if (newPassword !== confirmPassword) {
       setError("New password and confirm password do not match!");
       return;
     }
-    // Proceed with updating password
+
     console.log("Password updated successfully");
-    // Redirect to login or homepage after updating password
-    navigate("/login");
+    navigate("/login"); // Redirect to login after success
   };
 
   return (
     <Section className="relative min-h-screen flex flex-col items-center justify-center p-6 text-center">
-      {/* Background */}
+      {/* Background Image */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <img
           src={heroBackground}
@@ -53,7 +61,7 @@ const ForgotPassword = () => {
         />
       </div>
 
-      {/* Content */}
+      {/* Form Container */}
       <div className="relative z-10 bg-white bg-opacity-10 backdrop-blur-lg shadow-xl rounded-xl p-8 max-w-lg w-full">
         <h2 className="text-4xl font-extrabold text-white mb-6">
           Forgot Password
@@ -61,6 +69,7 @@ const ForgotPassword = () => {
 
         {error && <p className="text-red-500 text-center mb-5">{error}</p>}
 
+        {/* Step 1: Enter Email */}
         {step === 1 && (
           <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
             <input
@@ -80,6 +89,7 @@ const ForgotPassword = () => {
           </form>
         )}
 
+        {/* Step 2: Enter OTP */}
         {step === 2 && (
           <form onSubmit={handleOtpSubmit} className="flex flex-col gap-4">
             <input
@@ -99,6 +109,7 @@ const ForgotPassword = () => {
           </form>
         )}
 
+        {/* Step 3: Reset Password */}
         {step === 3 && (
           <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
             <input
@@ -126,6 +137,7 @@ const ForgotPassword = () => {
           </form>
         )}
 
+        {/* Navigation to login */}
         <p className="text-white mt-8">
           <button
             onClick={() => navigate("/login")}
@@ -135,6 +147,8 @@ const ForgotPassword = () => {
           </button>
         </p>
       </div>
+
+      {/* Decorative background element */}
       <Rings />
     </Section>
   );

@@ -8,12 +8,9 @@ from main import FACE_LOG_PATH
 
 router = APIRouter()
 
-mp_face_mesh = mp.solutions.face_mesh
-face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=1)
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 600
-
-# Decode base64 image from frontend
+# Decode base64-encoded image from frontend
 async def decode_image(img_string):
     try:
         img_data = base64.b64decode(img_string.split(",")[1])
@@ -23,7 +20,7 @@ async def decode_image(img_string):
         print(f"Error decoding image: {e}")
         return None
 
-# Append face confidence score to local file
+# Append face confidence data to local JSON file with timestamp
 def append_face_confidence(conf):
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     entry = {"timestamp": timestamp, "confidence": conf}
@@ -47,6 +44,7 @@ def append_face_confidence(conf):
     except Exception as e:
         print(f"Error logging face confidence: {e}")
 
+# WebSocket route for real-time face confidence detection
 @router.websocket("/face-confidence")
 async def detect_face_confidence(websocket: WebSocket):
     await websocket.accept()
@@ -55,51 +53,52 @@ async def detect_face_confidence(websocket: WebSocket):
     last_logged_time = time.time()
 
     try:
-        while True:
-            data = await websocket.receive_json()
+        with mp.solutions.face_mesh.FaceMesh(static_image_mode=False, max_num_faces=1) as face_mesh:
+            while True:
+                data = await websocket.receive_json()
 
-            if "image" not in data:
-                print("No image key in received data.")
-                continue
+                if "image" not in data:
+                    print("No image key in received data.")
+                    continue
 
-            frame = await decode_image(data["image"])
-            if frame is None:
-                print("Frame decoding failed.")
-                continue
+                frame = await decode_image(data["image"])
+                if frame is None:
+                    print("Frame decoding failed.")
+                    continue
 
-            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            results = face_mesh.process(rgb)
+                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                results = face_mesh.process(rgb)
 
-            face_confidence = 100.0
+                face_confidence = 100.0
 
-            if results.multi_face_landmarks:
-                landmarks = results.multi_face_landmarks[0].landmark
-                nose_x = int(landmarks[1].x * FRAME_WIDTH)
-                left_eye_x = int(landmarks[33].x * FRAME_WIDTH)
-                right_eye_x = int(landmarks[263].x * FRAME_WIDTH)
+                if results.multi_face_landmarks:
+                    landmarks = results.multi_face_landmarks[0].landmark
+                    nose_x = int(landmarks[1].x * FRAME_WIDTH)
+                    left_eye_x = int(landmarks[33].x * FRAME_WIDTH)
+                    right_eye_x = int(landmarks[263].x * FRAME_WIDTH)
 
-                center_x = FRAME_WIDTH // 2
-                deviation_x = abs(nose_x - center_x)
-                max_deviation = FRAME_WIDTH // 3
+                    center_x = FRAME_WIDTH // 2
+                    deviation_x = abs(nose_x - center_x)
+                    max_deviation = FRAME_WIDTH // 3
 
-                if deviation_x > max_deviation:
-                    face_confidence -= min((deviation_x / FRAME_WIDTH) * 100, 40)
+                    if deviation_x > max_deviation:
+                        face_confidence -= min((deviation_x / FRAME_WIDTH) * 100, 40)
 
-                eye_distance = abs(left_eye_x - right_eye_x)
-                expected_eye_distance = FRAME_WIDTH // 5
-                tilt_penalty = min(abs(expected_eye_distance - eye_distance) / expected_eye_distance * 40, 30)
-                face_confidence -= tilt_penalty
+                    eye_distance = abs(left_eye_x - right_eye_x)
+                    expected_eye_distance = FRAME_WIDTH // 5
+                    tilt_penalty = min(abs(expected_eye_distance - eye_distance) / expected_eye_distance * 40, 30)
+                    face_confidence -= tilt_penalty
 
-                face_confidence = max(min(face_confidence, 100), 0)
-            else:
-                face_confidence = 0  # no face detected
+                    face_confidence = max(min(face_confidence, 100), 0)
+                else:
+                    face_confidence = 0  # No face detected
 
-            # Log every 2 seconds
-            if time.time() - last_logged_time >= 2:
-                append_face_confidence(face_confidence)
-                last_logged_time = time.time()
+                # Log every 2 seconds
+                if time.time() - last_logged_time >= 2:
+                    append_face_confidence(face_confidence)
+                    last_logged_time = time.time()
 
-            await websocket.send_json({"face_confidence": face_confidence})
+                await websocket.send_json({"face_confidence": face_confidence})
 
     except WebSocketDisconnect:
         print("WebSocket disconnected.")

@@ -6,18 +6,23 @@ import { Rings } from "../components/design/Hero";
 
 const Signup = () => {
   const navigate = useNavigate();
+
+  // Form data state for signup
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+
   const [error, setError] = useState("");
 
+  // Update form values dynamically
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle signup form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
@@ -31,7 +36,7 @@ const Signup = () => {
 
   return (
     <Section className="relative min-h-screen flex flex-col items-center justify-center p-6 text-center">
-      {/* Background */}
+      {/* Background image with blur */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <img
           src={heroBackground}
@@ -42,14 +47,16 @@ const Signup = () => {
         />
       </div>
 
-      {/* Content */}
+      {/* Signup Form */}
       <div className="relative z-10 bg-white bg-opacity-10 backdrop-blur-lg shadow-xl rounded-xl p-8 max-w-lg w-full">
         <h2 className="text-4xl font-extrabold text-white mb-6">Sign Up</h2>
 
         {error && <p className="text-red-500 text-center">{error}</p>}
+
         <p className="text-lg opacity-70 mb-6">
           Join MockAI and take your job interview preparation to the next level!
         </p>
+
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="text"
@@ -96,6 +103,7 @@ const Signup = () => {
           </button>
         </form>
 
+        {/* Redirect link for existing users */}
         <p className="text-white mt-8">
           Already have an account?{" "}
           <button
@@ -106,6 +114,8 @@ const Signup = () => {
           </button>
         </p>
       </div>
+
+      {/* Decorative background animation */}
       <Rings />
     </Section>
   );
