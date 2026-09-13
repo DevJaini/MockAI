@@ -86,8 +86,6 @@ MockAI is an AI-driven job interview simulator that customizes interview questio
 ## About the Developers
 
 - **Jaini Shah**: Full-Stack Developer
-- **Kathan Pathak**: AI/ML Specialist and Backend Developer
-- **Krutik Doshi**: UI/UX Designer and Documentation Specialist
 
 ## Acknowledgements
 
